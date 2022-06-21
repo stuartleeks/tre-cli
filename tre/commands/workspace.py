@@ -1,34 +1,37 @@
 import logging
-from cliff.command import Command
+import click
 from tre.api_client import ApiClient
 
-class WorkspaceList(Command):
-    "List workspaces"
+from .workspace_workspace_service import workspace_workspace_service
+from .workspace_operation import workspace_operation
 
+
+@click.group()
+def workspace(help="query workspaces"):
+    pass
+
+
+@click.command(name="list", help="List workspaces")
+def workspace_list():
     log = logging.getLogger(__name__)
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(log, '/api/workspaces')
+    click.echo(response.text + '\n')
 
-    def take_action(self, parsed_args):
-        client = ApiClient.get_api_client_from_config()
-        response = client.call_api(self.log, '/api/workspaces')
-        self.app.stdout.write(response.text + '\n')
 
-class WorkspaceShow(Command):
-    "Show a workspace"
-
+@click.command(name="show", help="Show a workspace")
+@click.option('--workspace-id',
+              help='The ID of the workspace to show',
+              required=True)
+def workspace_show(workspace_id):
     log = logging.getLogger(__name__)
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(log, f'/api/workspaces/{workspace_id}')
+    # TODO - handle not found
+    click.echo(response.text + '\n')
 
-    def get_parser(self, prog_name):
-        parser = super(WorkspaceShow, self).get_parser(prog_name)
-        # Base args
-        parser.add_argument(
-            '--workspace-id', nargs='?',
-            help='The ID of the workspace to show',
-            required=True)
 
-        return parser
-
-    def take_action(self, parsed_args):
-        client = ApiClient.get_api_client_from_config()
-        response = client.call_api(self.log, f'/api/workspaces/{parsed_args.workspace_id}')
-        # TODO - handle not found
-        self.app.stdout.write(response.text + '\n')
+workspace.add_command(workspace_list)
+workspace.add_command(workspace_show)
+workspace.add_command(workspace_workspace_service)
+workspace.add_command(workspace_operation)

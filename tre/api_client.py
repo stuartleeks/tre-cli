@@ -6,7 +6,12 @@ from pathlib import Path
 
 
 class ApiClient:
-    def __init__(self, base_url: str, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str):
+    def __init__(self,
+                 base_url: str,
+                 client_id: str,
+                 client_secret: str,
+                 aad_tenant_id: str,
+                 api_scope: str):
         self.base_url = base_url
         self.client_id = client_id
         self.client_secret = client_secret
@@ -14,7 +19,11 @@ class ApiClient:
         self.api_scope = api_scope
 
     @staticmethod
-    def get_auth_token_client_credentials(log: Logger, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str):
+    def get_auth_token_client_credentials(log: Logger,
+                                          client_id: str,
+                                          client_secret: str,
+                                          aad_tenant_id: str,
+                                          api_scope: str):
         allow_insecure = True  # TODO add option?
         with Client(verify=not allow_insecure) as client:
             headers = {'Content-Type': "application/x-www-form-urlencoded"}
@@ -30,7 +39,7 @@ class ApiClient:
                     response_json = response.json()
                     token = response_json["access_token"]
                     return token
-                msg=f"Sign-in failed: {response.status_code}: {response.text}"
+                msg = f"Sign-in failed: {response.status_code}: {response.text}"
                 log.error(msg)
                 raise RuntimeError(msg)
             except JSONDecodeError:
@@ -61,6 +70,7 @@ class ApiClient:
     def call_api(self, log: Logger, url: str, scope_id: str = None) -> str:
         allow_insecure = True  # TODO add option?
         with Client(verify=not allow_insecure) as client:
-            headers = {'Authorization': f"Bearer {self.get_auth_token(log, scope_id)}"}
+            headers = {
+                'Authorization': f"Bearer {self.get_auth_token(log, scope_id)}"}
             response = client.get(f'{self.base_url}/{url}', headers=headers)
             return response

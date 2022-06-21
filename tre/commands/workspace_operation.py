@@ -1,50 +1,39 @@
 import logging
-from cliff.command import Command
+import click
 from tre.api_client import ApiClient
 
 
-class WorkspaceOperationList(Command):
-    "List workspaces"
+@click.group(name="operation", help="Workspace operations")
+def workspace_operation():
+    pass
 
+
+@click.command(name="list", help="List operations")
+@click.option('--workspace-id',
+              help='The ID of the workspace to show operations for',
+              required=True)
+def workspace_operation_list(workspace_id):
     log = logging.getLogger(__name__)
-
-    def get_parser(self, prog_name):
-        parser = super(WorkspaceOperationList, self).get_parser(prog_name)
-        parser.add_argument(
-            '--workspace-id', nargs='?',
-            help='The ID of the workspace to list operations for',
-            required=True)
-
-        return parser
-
-    def take_action(self, parsed_args):
-        client = ApiClient.get_api_client_from_config()
-        response = client.call_api(
-            self.log, f'/api/workspaces/{parsed_args.workspace_id}/operations')
-        self.app.stdout.write(response.text + '\n')
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(
+        log,  f'/api/workspaces/{workspace_id}/operations')
+    click.echo(response.text + '\n')
 
 
-class WorkspaceOperationShow(Command):
-    "Show a workspace"
-
+@click.command(name="show", help="Show an operation")
+@click.option('--workspace-id',
+              help='The ID of the workspace to show operation for',
+              required=True)
+@click.option('--operation-id',
+              help='The ID of the operation to show',
+              required=True)
+def workspace_operation_show(workspace_id, operation_id):
     log = logging.getLogger(__name__)
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(
+        log, f'/api/workspaces/{workspace_id}/operations/{operation_id}')
+    # TODO - handle not found
+    click.echo(response.text + '\n')
 
-    def get_parser(self, prog_name):
-        parser = super(WorkspaceOperationShow, self).get_parser(prog_name)
-        parser.add_argument(
-            '--workspace-id', nargs='?',
-            help='The ID of the workspace to show',
-            required=True)
-        parser.add_argument(
-            '--operation-id', nargs='?',
-            help='The ID of the operation to show',
-            required=True)
-
-        return parser
-
-    def take_action(self, parsed_args):
-        client = ApiClient.get_api_client_from_config()
-        response = client.call_api(
-            self.log, f'/api/workspaces/{parsed_args.workspace_id}/operations/{parsed_args.operation_id}')
-        # TODO - handle not found
-        self.app.stdout.write(response.text + '\n')
+workspace_operation.add_command(workspace_operation_list)
+workspace_operation.add_command(workspace_operation_show)

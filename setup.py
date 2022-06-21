@@ -4,12 +4,10 @@ from setuptools import find_packages
 from setuptools import setup
 
 PROJECT = 'tre'
-
-# Change docs/sphinx/conf.py too!
 VERSION = '0.1'
 
 try:
-    long_description = open('README.md', 'rt').read()
+    long_description = open('README.md', 'rt').read() # TODO: add long description
 except IOError:
     long_description = ''
 
@@ -41,7 +39,7 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['cliff'],
+    install_requires=['click'],
 
     namespace_packages=[],
     packages=find_packages(),
@@ -49,16 +47,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'tre = tre.main:main'
-        ],
-        'tre.cli': [
-            'login = tre.commands.login:Login',
-            'api = tre.commands.api_call:ApiCall',
-            'workspace list = tre.commands.workspace:WorkspaceList',
-            'workspace show = tre.commands.workspace:WorkspaceShow',
-            'workspace operation list = tre.commands.workspace_operation:WorkspaceOperationList',
-            'workspace operation show = tre.commands.workspace_operation:WorkspaceOperationShow',
-            'workspace workspace-service list = tre.commands.workspace_workspace_service:WorkspaceWorkspaceServiceList',
+            'tre = tre.main:cli'
         ],
     },
 

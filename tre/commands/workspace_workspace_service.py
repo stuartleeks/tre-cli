@@ -1,31 +1,32 @@
 import logging
-from cliff.command import Command
+import click
 from tre.api_client import ApiClient
 
 
-class WorkspaceWorkspaceServiceList(Command):
-    "List workspaces"
+@click.group(name="workspace-service", help="Workspace services")
+def workspace_workspace_service():
+    pass
 
+
+@click.command(name="list", help="List workspace services")
+@click.option('--workspace-id',
+              help='The ID of the workspace to show workspace services for',
+              required=True)
+def workspace_workspace_service_list(workspace_id):
     log = logging.getLogger(__name__)
 
-    def get_parser(self, prog_name):
-        parser = super(WorkspaceWorkspaceServiceList,
-                       self).get_parser(prog_name)
-        parser.add_argument(
-            '--workspace-id', nargs='?',
-            help='The ID of the workspace to list workspace services for',
-            required=True)
+    client = ApiClient.get_api_client_from_config()
+    workspace_response = client.call_api(
+        log, f'/api/workspaces/{workspace_id}')
+    # TODO - handle not found
+    workspace_json = workspace_response.json()
+    workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
 
-        return parser
+    response = client.call_api(
+        log,
+        f'/api/workspaces/{workspace_id}/workspace-services',
+        workspace_scope)
+    click.echo(response.text + '\n')
 
-    def take_action(self, parsed_args):
-        client = ApiClient.get_api_client_from_config()
-        workspace_response = client.call_api(
-            self.log, f'/api/workspaces/{parsed_args.workspace_id}')
-        # TODO - handle not found
-        workspace_json = workspace_response.json()
-        workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
 
-        response = client.call_api(
-            self.log, f'/api/workspaces/{parsed_args.workspace_id}/workspace-services', workspace_scope)
-        self.app.stdout.write(response.text + '\n')
+workspace_workspace_service.add_command(workspace_workspace_service_list)
