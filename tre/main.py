@@ -2,8 +2,8 @@ import click
 
 from tre.commands.login import login
 from tre.commands.api_call import call_api
-from tre.commands.workspace import workspace
-from tre.commands.workspaces import workspaces
+from tre.commands.workspaces.workspace import workspace
+from tre.commands.workspaces.workspaces import workspaces
 
 
 @click.group()
