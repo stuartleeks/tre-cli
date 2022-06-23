@@ -4,31 +4,6 @@ from tre.api_client import ApiClient
 from time import sleep
 
 
-@click.group(name="operation", help="Workspace operations")
-def workspace_operation():
-    pass
-
-
-@click.command(name="list", help="List operations")
-@click.option('--workspace-id',
-              envvar='TRECLI_WORKSPACE_ID',
-              help='The ID of the workspace to show operations for',
-              required=True)
-@click.option('--verify/--no-verify',
-              help='Enable/disable SSL verification',
-              default=True)
-def workspace_operation_list(workspace_id, verify):
-    log = logging.getLogger(__name__)
-    client = ApiClient.get_api_client_from_config()
-    response = client.call_api(
-        log,
-        'GET',
-        f'/api/workspaces/{workspace_id}/operations',
-        verify
-    )
-    click.echo(response.text + '\n')
-
-
 def IsOperationStateTerminal(state: str) -> bool:
     # Test against 'active' states
     # This way, a new state will be considered terminal (and not a success)
@@ -53,45 +28,34 @@ def IsOperationStateSuccess(state: str) -> bool:
     ]
 
 
-@click.command(name="show", help="Show an operation")
-@click.option('--workspace-id',
-              help='The ID of the workspace to show operation for',
-              envvar='TRECLI_WORKSPACE_ID',
-              required=True)
-@click.option('--operation-id',
-              help='The ID of the operation to show',
-              envvar='TRECLI_OPERATION_ID',
-              required=True)
-@click.option('--verify/--no-verify',
-              help='Enable/disable SSL verification',
-              envvar='TRECLI_VERIFY',
-              default=True)
+@click.command(name="operations", help="Workspace operations")
+@click.argument('operation_id', required=False)
 @click.option('--wait-for-completion',
+              help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
               flag_value=True,
               default=False)
-def workspace_operation_show(
-        workspace_id,
-        operation_id,
-        verify,
-        wait_for_completion):
-
+@click.pass_context
+def workspace_operations(ctx, operation_id, wait_for_completion):
     log = logging.getLogger(__name__)
+
+    obj = ctx.obj
+    workspace_id = obj['workspace_id']
+    if workspace_id is None:
+        raise click.UsageError('Missing workspace ID')
+    verify = obj['verify']
+
     client = ApiClient.get_api_client_from_config()
-
-    response = client.call_api(
-        log,
-        'GET',
-        f'/api/workspaces/{workspace_id}/operations/{operation_id}',
-        verify)
-    response_json = response.json()
-    action = response_json['operation']['action']
-    state = response_json['operation']['status']
-
-    while wait_for_completion and not IsOperationStateTerminal(state):
-        click.echo(f'Operation state: {state} (action={action})',
-                   err=True, nl=False)
-        sleep(5)
-        click.echo(' - refreshing...', err=True)
+    if operation_id is None:
+        # list
+        response = client.call_api(
+            log,
+            'GET',
+            f'/api/workspaces/{workspace_id}/operations',
+            verify
+        )
+        click.echo(response.text + '\n')
+    else:
+        # show
         response = client.call_api(
             log,
             'GET',
@@ -101,8 +65,18 @@ def workspace_operation_show(
         action = response_json['operation']['action']
         state = response_json['operation']['status']
 
-    click.echo(response.text + '\n')
+        while wait_for_completion and not IsOperationStateTerminal(state):
+            click.echo(f'Operation state: {state} (action={action})',
+                       err=True, nl=False)
+            sleep(5)
+            click.echo(' - refreshing...', err=True)
+            response = client.call_api(
+                log,
+                'GET',
+                f'/api/workspaces/{workspace_id}/operations/{operation_id}',
+                verify)
+            response_json = response.json()
+            action = response_json['operation']['action']
+            state = response_json['operation']['status']
 
-
-workspace_operation.add_command(workspace_operation_list)
-workspace_operation.add_command(workspace_operation_show)
+        click.echo(response.text + '\n')

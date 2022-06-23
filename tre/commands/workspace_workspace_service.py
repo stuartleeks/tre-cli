@@ -3,37 +3,33 @@ import click
 from tre.api_client import ApiClient
 
 
-@click.group(name="workspace-service", help="Workspace services")
-def workspace_workspace_service():
-    pass
-
-
-@click.command(name="list", help="List workspace services")
-@click.option('--workspace-id',
-              envvar='TRECLI_WORKSPACE_ID',
-              help='The ID of the workspace to show workspace services for',
-              required=True)
-@click.option('--verify/--no-verify',
-              help='Enable/disable SSL verification',
-              default=True)
-def workspace_workspace_service_list(workspace_id, verify):
+@click.command(name="workspace-services", help="Workspace services")
+@click.argument('service_id', required=False)
+@click.pass_context
+def workspace_workspace_service(ctx, service_id):
     log = logging.getLogger(__name__)
 
+    obj = ctx.obj
+    workspace_id = obj['workspace_id']
+    if workspace_id is None:
+        raise click.UsageError('Missing workspace ID')
+    verify = obj['verify']
+
     client = ApiClient.get_api_client_from_config()
-    workspace_response = client.call_api(
-        log,
-        'GET',
-        f'/api/workspaces/{workspace_id}',
-        verify)
-    workspace_json = workspace_response.json()
-    workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
-
-    response = client.call_api(
-        log,
-        'GET',
-        f'/api/workspaces/{workspace_id}/workspace-services',
-        workspace_scope)
-    click.echo(response.text + '\n')
-
-
-workspace_workspace_service.add_command(workspace_workspace_service_list)
+    if service_id is None:
+        # list
+        response = client.call_api(
+            log,
+            'GET',
+            f'/api/workspaces/{workspace_id}/workspace-services',
+            verify
+        )
+        click.echo(response.text + '\n')
+    else:
+        # show
+        response = client.call_api(
+            log,
+            'GET',
+            f'/api/workspaces/{workspace_id}/workspace-services/{service_id}',
+            verify)
+        click.echo(response.text + '\n')
