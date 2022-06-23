@@ -1,9 +1,7 @@
 import json
-import typing
 import click
 from logging import Logger
-from httpx import Client
-from httpx._types import RequestData
+from httpx import Client, Response
 from pathlib import Path
 
 
@@ -13,12 +11,14 @@ class ApiClient:
                  client_id: str,
                  client_secret: str,
                  aad_tenant_id: str,
-                 api_scope: str):
+                 api_scope: str,
+                 verify: bool):
         self.base_url = base_url
         self.client_id = client_id
         self.client_secret = client_secret
         self.aad_tenant_id = aad_tenant_id
         self.api_scope = api_scope
+        self.verify = verify
 
     @staticmethod
     def get_auth_token_client_credentials(log: Logger,
@@ -51,7 +51,7 @@ class ApiClient:
         raise RuntimeError("Failed to get auth token")
 
     @staticmethod
-    def get_api_client_from_config():
+    def get_api_client_from_config() -> Response:
         config_text = Path(
             '~/.config/tre/environment.json').expanduser().read_text(
                 encoding='utf-8')
@@ -61,7 +61,9 @@ class ApiClient:
             config['client-id'],
             config['client-secret'],
             config['aad-tenant-id'],
-            config['api-scope'])
+            config['api-scope'],
+            config['verify'],
+        )
 
     def get_auth_token(self, log: Logger, scope: str = None) -> str:
         return ApiClient.get_auth_token_client_credentials(
@@ -76,13 +78,12 @@ class ApiClient:
         log: Logger,
         method: str,
         url: str,
-        verify: bool,
         headers: dict[str, str] = {},
         json=None,
         scope_id: str = None,
         throw_on_error: bool = True,
     ) -> str:
-        with Client(verify=verify) as client:
+        with Client(verify=self.verify) as client:
             headers = headers.copy()
             headers['Authorization'] = f"Bearer {self.get_auth_token(log, scope_id)}"
             response = client.request(method, f'{self.base_url}/{url}', headers=headers, json=json)

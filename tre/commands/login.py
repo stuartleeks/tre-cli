@@ -10,8 +10,8 @@ from tre.api_client import ApiClient
 @click.command(name="login", help="Set the TRE credentials and base URL")
 @click.option('--base-url',
               required=True,
-              help='The TRE base URL, e.g. ' +
-              'https://<id>.<location>.cloudapp.azure.com/')
+              help='The TRE base URL, e.g. '
+              + 'https://<id>.<location>.cloudapp.azure.com/')
 @click.option('--client-id',
               required=True,
               help='The Client ID to use for authenticating')
@@ -24,7 +24,10 @@ from tre.api_client import ApiClient
 @click.option('--api-scope',
               required=True,
               help='The API scope for the base API')
-def login(base_url, client_id, client_secret, aad_tenant_id, api_scope):
+@click.option('--verify/--no-verify',
+              help='Enable/disable SSL verification',
+              default=True)
+def login(base_url: str, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str, verify: bool):
     """login"""
     log = logging.getLogger(__name__)
     # Test the auth succeeds
@@ -49,7 +52,8 @@ def login(base_url, client_id, client_secret, aad_tenant_id, api_scope):
         'client-id': client_id,
         'client-secret': client_secret,
         'aad-tenant-id': aad_tenant_id,
-        'api-scope': api_scope
+        'api-scope': api_scope,
+        'verify': verify,
     }
 
     # ensure ~/.config/tre folder exists
