@@ -1,7 +1,9 @@
-from json import JSONDecodeError
 import json
+import typing
+import click
 from logging import Logger
 from httpx import Client
+from httpx._types import RequestData
 from pathlib import Path
 
 
@@ -42,7 +44,7 @@ class ApiClient:
                 msg = f"Sign-in failed: {response.status_code}: {response.text}"
                 log.error(msg)
                 raise RuntimeError(msg)
-            except JSONDecodeError:
+            except json.JSONDecodeError:
                 log.debug(
                     f'Failed to parse response as JSON: {response.content}')
 
@@ -51,7 +53,8 @@ class ApiClient:
     @staticmethod
     def get_api_client_from_config():
         config_text = Path(
-            '~/.config/tre/environment.json').expanduser().read_text(encoding='utf-8')
+            '~/.config/tre/environment.json').expanduser().read_text(
+                encoding='utf-8')
         config = json.loads(config_text)
         return ApiClient(
             config['base-url'],
@@ -61,16 +64,28 @@ class ApiClient:
             config['api-scope'])
 
     def get_auth_token(self, log: Logger, scope: str = None) -> str:
-        return ApiClient.get_auth_token_client_credentials(log,
-                                                           self.client_id,
-                                                           self.client_secret,
-                                                           self.aad_tenant_id,
-                                                           scope or self.api_scope)
+        return ApiClient.get_auth_token_client_credentials(
+            log,
+            self.client_id,
+            self.client_secret,
+            self.aad_tenant_id,
+            scope or self.api_scope)
 
-    def call_api(self, log: Logger, url: str, scope_id: str = None) -> str:
-        allow_insecure = True  # TODO add option?
-        with Client(verify=not allow_insecure) as client:
-            headers = {
-                'Authorization': f"Bearer {self.get_auth_token(log, scope_id)}"}
-            response = client.get(f'{self.base_url}/{url}', headers=headers)
+    def call_api(
+        self,
+        log: Logger,
+        method: str,
+        url: str,
+        verify: bool,
+        headers: dict[str, str] = {},
+        json=None,
+        scope_id: str = None,
+        throw_on_error: bool = True,
+    ) -> str:
+        with Client(verify=verify) as client:
+            headers = headers.copy()
+            headers['Authorization'] = f"Bearer {self.get_auth_token(log, scope_id)}"
+            response = client.request(method, f'{self.base_url}/{url}', headers=headers, json=json)
+            if throw_on_error and response.is_error:
+                raise click.ClickException(message=response.text)
             return response
