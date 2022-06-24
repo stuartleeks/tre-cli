@@ -5,10 +5,7 @@ import logging
 from tre.api_client import ApiClient
 
 from .workspace_contexts import WorkspaceOperationContext
-from .workspace_workspace_service import workspace_workspace_service
-from .workspace_workspace_services import workspace_workspace_services
-from .workspace_operation import workspace_operation_show, workspace_operation
-from .workspace_operations import workspace_operations
+from .workspace_operation import workspace_operation_show
 
 
 @click.group(help="List/add workspaces")
@@ -144,10 +141,5 @@ def workspace_delete(ctx, yes, wait_for_completion):
         click.echo(response.text + '\n')
 
 
-workspace.add_command(workspace_show)
-workspace.add_command(workspace_set_enabled)
-workspace.add_command(workspace_delete)
-workspace.add_command(workspace_workspace_services)
-workspace.add_command(workspace_workspace_service)
-workspace.add_command(workspace_operations)
-workspace.add_command(workspace_operation)
+workspaces.add_command(workspaces_list)
+workspaces.add_command(workspaces_create)
