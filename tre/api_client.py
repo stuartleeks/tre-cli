@@ -52,17 +52,22 @@ class ApiClient:
 
     @staticmethod
     def get_api_client_from_config() -> Response:
-        config_text = Path(
-            '~/.config/tre/environment.json').expanduser().read_text(
-                encoding='utf-8')
+
+        config_path = Path("~/.config/tre/environment.json").expanduser()
+        if not config_path.exists():
+            raise click.ClickException(
+                "You need to log in (tre login) before calling this command"
+            )
+
+        config_text = config_path.read_text(encoding="utf-8")
         config = json.loads(config_text)
         return ApiClient(
-            config['base-url'],
-            config['client-id'],
-            config['client-secret'],
-            config['aad-tenant-id'],
-            config['api-scope'],
-            config['verify'],
+            config["base-url"],
+            config["client-id"],
+            config["client-secret"],
+            config["aad-tenant-id"],
+            config["api-scope"],
+            config["verify"],
         )
 
     def get_auth_token(self, log: Logger, scope: str = None) -> str:
@@ -78,7 +83,7 @@ class ApiClient:
         log: Logger,
         method: str,
         url: str,
-        headers: dict[str, str] = {},
+        headers: "dict[str, str]" = {},
         json=None,
         scope_id: str = None,
         throw_on_error: bool = True,
