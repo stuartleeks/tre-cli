@@ -5,6 +5,21 @@ from httpx import Client, Response
 from pathlib import Path
 
 
+class ApiException(click.ClickException):
+    """An exception that Click can handle and show to the user containing API call error info."""
+
+    # Use exit code 2 for API errors that are JSON
+    exit_code = 2
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+    def show(self, file=None) -> None:
+        # Write (JSON) message stdout without any extra info to allow callers to parse it
+        click.echo(self.message, file=file)
+
+
 class ApiClient:
     def __init__(self,
                  base_url: str,
@@ -84,14 +99,18 @@ class ApiClient:
         method: str,
         url: str,
         headers: "dict[str, str]" = {},
-        json=None,
+        json_data=None,
         scope_id: str = None,
         throw_on_error: bool = True,
-    ) -> str:
+    ) -> Response:
         with Client(verify=self.verify) as client:
             headers = headers.copy()
             headers['Authorization'] = f"Bearer {self.get_auth_token(log, scope_id)}"
-            response = client.request(method, f'{self.base_url}/{url}', headers=headers, json=json)
+            response = client.request(method, f'{self.base_url}/{url}', headers=headers, json=json_data)
             if throw_on_error and response.is_error:
-                raise click.ClickException(message=response.text)
+                error_info = {
+                    'status_code': response.status_code,
+                    'body': response.text,
+                }
+                raise ApiException(message=json.dumps(error_info, indent=2))
             return response

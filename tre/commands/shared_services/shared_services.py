@@ -41,7 +41,7 @@ def shared_services_create(ctx, definition, definition_file, wait_for_completion
 
     client = ApiClient.get_api_client_from_config()
     click.echo("Creating shared_service...", err=True)
-    response = client.call_api(log, 'POST', '/api/shared-services', json=definition_dict)
+    response = client.call_api(log, 'POST', '/api/shared-services', json_data=definition_dict)
 
     if wait_for_completion:
         ctx.obj = SharedServiceOperationContext.from_operation_response(response)
@@ -100,7 +100,7 @@ def shared_service_set_enabled(ctx, etag, enable, wait_for_completion):
         f'/api/shared-services/{shared_service_id}',
         verify,
         headers={'etag': etag},
-        json={'isEnabled': enable})
+        json_data={'isEnabled': enable})
     if wait_for_completion:
         response_json = response.json()
         ctx.obj['shared_service_id'] = response_json['operation']['resourceId']

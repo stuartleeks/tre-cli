@@ -41,7 +41,7 @@ def workspaces_create(ctx, definition, definition_file, wait_for_completion):
 
     client = ApiClient.get_api_client_from_config()
     click.echo("Creating workspace...", err=True)
-    response = client.call_api(log, 'POST', '/api/workspaces', json=definition_dict)
+    response = client.call_api(log, 'POST', '/api/workspaces', json_data=definition_dict)
 
     if wait_for_completion:
         ctx.obj = WorkspaceOperationContext.from_operation_response(response)
@@ -100,7 +100,7 @@ def workspace_set_enabled(ctx, etag, enable, wait_for_completion):
         f'/api/workspaces/{workspace_id}',
         verify,
         headers={'etag': etag},
-        json={'isEnabled': enable})
+        json_data={'isEnabled': enable})
     if wait_for_completion:
         response_json = response.json()
         ctx.obj['workspace_id'] = response_json['operation']['resourceId']

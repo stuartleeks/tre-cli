@@ -55,7 +55,7 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
         'PATCH',
         f'/api/workspaces/{workspace_id}',
         headers={'etag': etag},
-        json={'isEnabled': enable})
+        json_data={'isEnabled': enable})
     if wait_for_completion:
         ctx.obj = WorkspaceOperationContext.from_operation_response(response)
         click.echo("Waiting for completion...", err=True)
