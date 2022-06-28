@@ -1,7 +1,11 @@
-import json
 import click
-from logging import Logger
+import json
+import msal
+import os
+
+from typing import Callable
 from httpx import Client, Response
+from logging import Logger
 from pathlib import Path
 
 
@@ -23,17 +27,11 @@ class ApiException(click.ClickException):
 class ApiClient:
     def __init__(self,
                  base_url: str,
-                 client_id: str,
-                 client_secret: str,
-                 aad_tenant_id: str,
-                 api_scope: str,
+                 get_auth_token: "Callable[[Logger, str], str]",
                  verify: bool):
         self.base_url = base_url
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.aad_tenant_id = aad_tenant_id
-        self.api_scope = api_scope
         self.verify = verify
+        self.get_auth_token = get_auth_token
 
     @staticmethod
     def get_auth_token_client_credentials(log: Logger,
@@ -41,8 +39,7 @@ class ApiClient:
                                           client_secret: str,
                                           aad_tenant_id: str,
                                           api_scope: str):
-        allow_insecure = True  # TODO add option?
-        with Client(verify=not allow_insecure) as client:
+        with Client() as client:
             headers = {'Content-Type': "application/x-www-form-urlencoded"}
             # Use Client Credentials flow
             payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope={api_scope}/.default"
@@ -66,6 +63,31 @@ class ApiClient:
         raise RuntimeError("Failed to get auth token")
 
     @staticmethod
+    def get_auth_token_msal(log: Logger,
+                            token_cache_file: str,
+                            client_id: str,
+                            aad_tenant_id: str,
+                            scope: str):
+
+        cache = msal.SerializableTokenCache()
+        if os.path.exists(token_cache_file):
+            cache.deserialize(open(token_cache_file, "r").read())
+
+        app = msal.PublicClientApplication(
+            client_id=client_id,
+            authority=f"https://login.microsoftonline.com/{aad_tenant_id}",
+            token_cache=cache)
+
+        accounts = app.get_accounts()
+        if accounts:
+            auth_result = app.acquire_token_silent(scopes=[scope], account=accounts[0])
+            if cache.has_state_changed:
+                open(token_cache_file, "w").write(cache.serialize())
+            return auth_result["access_token"]
+
+        raise RuntimeError("Failed to get auth token")
+
+    @staticmethod
     def get_api_client_from_config() -> Response:
 
         config_path = Path("~/.config/tre/environment.json").expanduser()
@@ -76,22 +98,34 @@ class ApiClient:
 
         config_text = config_path.read_text(encoding="utf-8")
         config = json.loads(config_text)
+
+        login_method = config["login-method"]
+        if login_method == "client-credentials":
+            def get_auth_token(log, scope):
+                return ApiClient.get_auth_token_client_credentials(
+                    log,
+                    config["client-id"],
+                    config["client-secret"],
+                    config["aad-tenant-id"],
+                    scope or config["api-scope"]
+                )
+        elif login_method == "device-code":
+            def get_auth_token(log, scope):
+                return ApiClient.get_auth_token_msal(
+                    log,
+                    config["token-cache-file"],
+                    config["client-id"],
+                    config["aad-tenant-id"],
+                    scope or config["api-scope"]
+                )
+        else:
+            raise click.ClickException(f"Unhandled login method: {login_method}")
+
         return ApiClient(
             config["base-url"],
-            config["client-id"],
-            config["client-secret"],
-            config["aad-tenant-id"],
-            config["api-scope"],
+            get_auth_token,
             config["verify"],
         )
-
-    def get_auth_token(self, log: Logger, scope: str = None) -> str:
-        return ApiClient.get_auth_token_client_credentials(
-            log,
-            self.client_id,
-            self.client_secret,
-            self.aad_tenant_id,
-            scope or self.api_scope)
 
     def call_api(
         self,
