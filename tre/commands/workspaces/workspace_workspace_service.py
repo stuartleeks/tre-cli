@@ -1,6 +1,7 @@
 import logging
 import click
 from tre.api_client import ApiClient
+from tre.output import output
 
 from .workspace_contexts import WorkspaceWorkspaceServiceContext, pass_workspace_workspace_service_context
 
@@ -13,8 +14,10 @@ def workspace_workspace_service(ctx: click.Context, service_id) -> None:
 
 
 @click.command(name="show", help="Workspace service")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_workspace_workspace_service_context
-def workspace_workspace_service_show(workspace_workspace_service_context: WorkspaceWorkspaceServiceContext):
+def workspace_workspace_service_show(workspace_workspace_service_context: WorkspaceWorkspaceServiceContext, output_format, query) -> None:
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_workspace_service_context.workspace_id
@@ -41,7 +44,7 @@ def workspace_workspace_service_show(workspace_workspace_service_context: Worksp
         scope_id=workspace_scope,
     )
 
-    click.echo(response.text + '\n')
+    output(response.text, output_format=output_format, query=query)
 
 
 workspace_workspace_service.add_command(workspace_workspace_service_show)

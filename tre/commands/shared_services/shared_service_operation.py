@@ -6,7 +6,7 @@ from time import sleep
 from .shared_service_contexts import pass_shared_service_operation_context, SharedServiceOperationContext
 
 
-def is_operational_state_terminal(state: str) -> bool:
+def is_operation_state_terminal(state: str) -> bool:
     # Test against 'active' states
     # This way, a new state will be considered terminal (and not a success)
     # so we avoid a case where --wait-for-completion continues indefinitely
@@ -15,13 +15,14 @@ def is_operational_state_terminal(state: str) -> bool:
     return state not in [
         'deleting',
         'deploying',
+        'awaiting_action',
         'invoking_action',
         'pipeline_deploying',
         'not_deployed',
     ]
 
 
-def is_operational_state_success(state: str) -> bool:
+def is_operation_state_success(state: str) -> bool:
     return state in [
         'deleted',
         'deployed',
@@ -43,7 +44,7 @@ def shared_service_operation(ctx: click.Context, operation_id) -> None:
               flag_value=True,
               default=False)
 @pass_shared_service_operation_context
-def shared_service_operation_show(shared_service_operation_context: SharedServiceOperationContext, wait_for_completion):
+def shared_service_operation_show(shared_service_operation_context: SharedServiceOperationContext, wait_for_completion, suppress_output: bool = False):
     log = logging.getLogger(__name__)
 
     shared_service_id = shared_service_operation_context.shared_service_id
@@ -64,7 +65,7 @@ def shared_service_operation_show(shared_service_operation_context: SharedServic
     action = response_json['operation']['action']
     state = response_json['operation']['status']
 
-    while wait_for_completion and not is_operational_state_terminal(state):
+    while wait_for_completion and not is_operation_state_terminal(state):
         click.echo(f'Operation state: {state} (action={action})',
                    err=True, nl=False)
         sleep(5)
@@ -78,7 +79,8 @@ def shared_service_operation_show(shared_service_operation_context: SharedServic
         action = response_json['operation']['action']
         state = response_json['operation']['status']
 
-    click.echo(response.text + '\n')
+    if not suppress_output:
+        click.echo(response.text + '\n')
 
 
 shared_service_operation.add_command(shared_service_operation_show)

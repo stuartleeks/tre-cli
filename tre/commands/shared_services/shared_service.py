@@ -2,6 +2,7 @@ import click
 import logging
 
 from tre.api_client import ApiClient
+from tre.output import output
 from .shared_service_contexts import pass_shared_service_context, SharedServiceContext
 
 from .shared_service_operation import SharedServiceOperationContext, shared_service_operation_show, shared_service_operation
@@ -16,8 +17,10 @@ def shared_service(ctx: click.Context, shared_service_id: str) -> None:
 
 
 @click.command(name="show", help="Show a shared_service")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_shared_service_context
-def shared_service_show(shared_service_context: SharedServiceContext):
+def shared_service_show(shared_service_context: SharedServiceContext, output_format, query):
     log = logging.getLogger(__name__)
 
     shared_service_id = shared_service_context.shared_service_id
@@ -26,7 +29,7 @@ def shared_service_show(shared_service_context: SharedServiceContext):
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(log, 'GET', f'/api/shared-services/{shared_service_id}', )
-    click.echo(response.text + '\n')
+    output(response.text, output_format=output_format, query=query)
 
 
 @click.command(name="invoke-action", help="Invoke an action on a shared_service")
@@ -34,9 +37,11 @@ def shared_service_show(shared_service_context: SharedServiceContext):
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @click.pass_context
 @pass_shared_service_context
-def shared_service_invoke_action(shared_service_context: SharedServiceContext, ctx: click.Context, action_name, wait_for_completion):
+def shared_service_invoke_action(shared_service_context: SharedServiceContext, ctx: click.Context, action_name, wait_for_completion, output_format, query):
     log = logging.getLogger(__name__)
 
     shared_service_id = shared_service_context.shared_service_id
@@ -53,9 +58,9 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
     if wait_for_completion:
         ctx.obj = SharedServiceOperationContext.from_operation_response(response)
         click.echo("Waiting for completion...", err=True)
-        ctx.invoke(shared_service_operation_show, wait_for_completion=True)
+        ctx.invoke(shared_service_operation_show, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        click.echo(response.text + '\n')
+        output(response.text, output_format=output_format, query=query)
 
 
 @click.command(name="delete", help="Delete a shared_service")
@@ -64,8 +69,10 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
               flag_value=True,
               default=False)
 @click.pass_context
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_shared_service_context
-def shared_service_delete(shared_service_context: SharedServiceContext, ctx: click.Context, yes, wait_for_completion):
+def shared_service_delete(shared_service_context: SharedServiceContext, ctx: click.Context, yes, wait_for_completion, output_format, query):
     log = logging.getLogger(__name__)
 
     shared_service_id = shared_service_context.shared_service_id
@@ -81,9 +88,9 @@ def shared_service_delete(shared_service_context: SharedServiceContext, ctx: cli
     if wait_for_completion:
         ctx.obj = SharedServiceOperationContext.from_operation_response(response)
         click.echo("Waiting for completion...", err=True)
-        ctx.invoke(shared_service_operation_show, wait_for_completion=True)
+        ctx.invoke(shared_service_operation_show, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        click.echo(response.text + '\n')
+        output(response.text, output_format=output_format, query=query)
 
 
 shared_service.add_command(shared_service_show)

@@ -3,6 +3,8 @@ import click
 from tre.api_client import ApiClient
 from time import sleep
 
+from tre.output import output
+
 from .workspace_contexts import pass_workspace_operation_context, WorkspaceOperationContext
 
 
@@ -18,6 +20,7 @@ def is_operational_state_terminal(state: str) -> bool:
         'invoking_action',
         'pipeline_deploying',
         'not_deployed',
+        'awaiting_deletion'
     ]
 
 
@@ -42,8 +45,10 @@ def workspace_operation(ctx: click.Context, operation_id) -> None:
               help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
               flag_value=True,
               default=False)
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_workspace_operation_context
-def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, wait_for_completion):
+def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_operation_context.workspace_id
@@ -78,7 +83,8 @@ def workspace_operation_show(workspace_operation_context: WorkspaceOperationCont
         action = response_json['operation']['action']
         state = response_json['operation']['status']
 
-    click.echo(response.text + '\n')
+    if not suppress_output:
+        output(response.text, output_format=output_format, query=query)
 
 
 workspace_operation.add_command(workspace_operation_show)
