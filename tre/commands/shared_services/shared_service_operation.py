@@ -6,33 +6,6 @@ from tre.commands.operation import operation_show
 from .shared_service_contexts import pass_shared_service_operation_context, SharedServiceOperationContext
 
 
-def is_operation_state_terminal(state: str) -> bool:
-    # In the absence of a field on the operation indicating whether it is completed or not,
-    # we maintain a list here.
-    # Note that we test against 'active' states
-    # This way, a new state will be considered terminal (and not a success)
-    # so we avoid a case where --wait-for-completion continues indefinitely
-    # when there is a new state (and we return a non-successful status to
-    # highlight it)
-    return state not in [
-        'deleting',
-        'deploying',
-        'awaiting_action',
-        'invoking_action',
-        'pipeline_deploying',
-        'not_deployed',
-    ]
-
-
-def is_operation_state_success(state: str) -> bool:
-    return state in [
-        'deleted',
-        'deployed',
-        'action_succeeded',
-        'pipeline_succeeded',
-    ]
-
-
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")
 @click.argument('operation_id', required=True)
 @click.pass_context

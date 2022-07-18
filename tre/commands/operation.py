@@ -5,8 +5,10 @@ from tre.api_client import ApiClient
 from tre.output import output
 
 
-def is_operational_state_terminal(state: str) -> bool:
-    # Test against 'active' states
+def is_operation_state_terminal(state: str) -> bool:
+    # In the absence of a field on the operation indicating whether it is completed or not,
+    # we maintain a list here.
+    # Note that we test against 'active' states
     # This way, a new state will be considered terminal (and not a success)
     # so we avoid a case where --wait-for-completion continues indefinitely
     # when there is a new state (and we return a non-successful status to
@@ -14,14 +16,14 @@ def is_operational_state_terminal(state: str) -> bool:
     return state not in [
         'deleting',
         'deploying',
+        'awaiting_action',
         'invoking_action',
         'pipeline_deploying',
         'not_deployed',
-        'awaiting_deletion'
     ]
 
 
-def is_operational_state_success(state: str) -> bool:
+def is_operation_state_success(state: str) -> bool:
     return state in [
         'deleted',
         'deployed',
@@ -42,7 +44,7 @@ def operation_show(log, operation_url, wait_for_completion, output_format, query
     action = response_json['operation']['action']
     state = response_json['operation']['status']
 
-    while wait_for_completion and not is_operational_state_terminal(state):
+    while wait_for_completion and not is_operation_state_terminal(state):
         click.echo(f'Operation state: {state} (action={action})',
                    err=True, nl=False)
         sleep(5)
