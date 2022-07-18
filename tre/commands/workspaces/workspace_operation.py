@@ -1,36 +1,8 @@
 import logging
 import click
-from tre.api_client import ApiClient
-from time import sleep
-
-from tre.output import output
+from tre.commands.operation import operation_show
 
 from .workspace_contexts import pass_workspace_operation_context, WorkspaceOperationContext
-
-
-def is_operational_state_terminal(state: str) -> bool:
-    # Test against 'active' states
-    # This way, a new state will be considered terminal (and not a success)
-    # so we avoid a case where --wait-for-completion continues indefinitely
-    # when there is a new state (and we return a non-successful status to
-    # highlight it)
-    return state not in [
-        'deleting',
-        'deploying',
-        'invoking_action',
-        'pipeline_deploying',
-        'not_deployed',
-        'awaiting_deletion'
-    ]
-
-
-def is_operational_state_success(state: str) -> bool:
-    return state in [
-        'deleted',
-        'deployed',
-        'action_succeeded',
-        'pipeline_succeeded',
-    ]
 
 
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")
@@ -45,8 +17,13 @@ def workspace_operation(ctx: click.Context, operation_id) -> None:
               help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@click.option('--output', '-o', 'output_format',
+              help="Output format",
+              type=click.Choice(['json', 'none']),
+              default='json')
+@click.option('--query', '-q',
+              help="JMESPath query to apply to the result",
+              default=None)
 @pass_workspace_operation_context
 def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
@@ -58,33 +35,8 @@ def workspace_operation_show(workspace_operation_context: WorkspaceOperationCont
     if operation_id is None:
         raise click.UsageError('Missing operation ID')
 
-    client = ApiClient.get_api_client_from_config()
-
-    response = client.call_api(
-        log,
-        'GET',
-        f'/api/workspaces/{workspace_id}/operations/{operation_id}',
-    )
-    response_json = response.json()
-    action = response_json['operation']['action']
-    state = response_json['operation']['status']
-
-    while wait_for_completion and not is_operational_state_terminal(state):
-        click.echo(f'Operation state: {state} (action={action})',
-                   err=True, nl=False)
-        sleep(5)
-        click.echo(' - refreshing...', err=True)
-        response = client.call_api(
-            log,
-            'GET',
-            f'/api/workspaces/{workspace_id}/operations/{operation_id}',
-        )
-        response_json = response.json()
-        action = response_json['operation']['action']
-        state = response_json['operation']['status']
-
-    if not suppress_output:
-        output(response.text, output_format=output_format, query=query)
+    operation_url = f'/api/workspaces/{workspace_id}/operations/{operation_id}'
+    operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output)
 
 
 workspace_operation.add_command(workspace_operation_show)

@@ -1,5 +1,4 @@
 import click
-from httpx import Response
 
 
 class WorkspaceContext(object):
@@ -14,14 +13,6 @@ class WorkspaceOperationContext(object):
     def __init__(self, workspace_id: str, operation_id: str):
         self.workspace_id = workspace_id
         self.operation_id = operation_id
-
-    @staticmethod
-    def from_operation_response(response: Response) -> "WorkspaceOperationContext":
-        response_json = response.json()
-        return WorkspaceOperationContext(
-            workspace_id=response_json["operation"]["resourceId"],
-            operation_id=response_json["operation"]["id"],
-        )
 
     @staticmethod
     def add_operation_id_to_context_obj(ctx: click.Context, operation_id: str) -> "WorkspaceOperationContext":

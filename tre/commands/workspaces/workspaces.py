@@ -3,10 +3,8 @@ import json
 import logging
 
 from tre.api_client import ApiClient
+from tre.commands.operation import operation_show
 from tre.output import output
-
-from .workspace_contexts import WorkspaceOperationContext
-from .workspace_operation import workspace_operation_show
 
 
 @click.group(help="List/add workspaces")
@@ -50,9 +48,8 @@ def workspaces_create(ctx, definition, definition_file, wait_for_completion, out
     response = client.call_api(log, 'POST', '/api/workspaces', json_data=definition_dict)
 
     if wait_for_completion:
-        ctx.obj = WorkspaceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(workspace_operation_show, wait_for_completion=True)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
         output(response.text, output_format=output_format, query=query)
         return response.text

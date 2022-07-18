@@ -3,10 +3,8 @@ import json
 import logging
 
 from tre.api_client import ApiClient
+from tre.commands.operation import operation_show
 from tre.output import output
-
-from .shared_service_contexts import SharedServiceOperationContext
-from .shared_service_operation import shared_service_operation_show
 
 
 @click.group(help="List/add shared_services")
@@ -49,9 +47,8 @@ def shared_services_create(ctx, definition, definition_file, wait_for_completion
     response = client.call_api(log, 'POST', '/api/shared-services', json_data=definition_dict)
 
     if wait_for_completion:
-        ctx.obj = SharedServiceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(shared_service_operation_show, wait_for_completion=True, output_format=output_format, query=query)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
         output(response.text, output_format=output_format, query=query)
 

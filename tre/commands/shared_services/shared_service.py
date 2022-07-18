@@ -2,10 +2,11 @@ import click
 import logging
 
 from tre.api_client import ApiClient
+from tre.commands.operation import operation_show
 from tre.output import output
 from .shared_service_contexts import pass_shared_service_context, SharedServiceContext
 
-from .shared_service_operation import SharedServiceOperationContext, shared_service_operation_show, shared_service_operation
+from .shared_service_operation import shared_service_operation
 from .shared_service_operations import shared_service_operations
 
 
@@ -56,9 +57,8 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
         f'/api/shared-services/{shared_service_id}/invoke-action?action={action_name}'
     )
     if wait_for_completion:
-        ctx.obj = SharedServiceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(shared_service_operation_show, wait_for_completion=True, output_format=output_format, query=query)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
         output(response.text, output_format=output_format, query=query)
 
@@ -86,9 +86,8 @@ def shared_service_delete(shared_service_context: SharedServiceContext, ctx: cli
     click.echo("Deleting shared_service...\n", err=True)
     response = client.call_api(log, 'DELETE', f'/api/shared-services/{shared_service_id}')
     if wait_for_completion:
-        ctx.obj = SharedServiceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(shared_service_operation_show, wait_for_completion=True, output_format=output_format, query=query)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
         output(response.text, output_format=output_format, query=query)
 

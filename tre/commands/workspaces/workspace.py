@@ -2,11 +2,12 @@ import click
 import logging
 
 from tre.api_client import ApiClient
+from tre.commands.operation import operation_show
 from .workspace_contexts import pass_workspace_context, WorkspaceContext
 
 from .workspace_workspace_service import workspace_workspace_service
 from .workspace_workspace_services import workspace_workspace_services
-from .workspace_operation import WorkspaceOperationContext, workspace_operation_show, workspace_operation
+from .workspace_operation import workspace_operation
 from .workspace_operations import workspace_operations
 
 
@@ -39,9 +40,16 @@ def workspace_show(workspace_context: WorkspaceContext):
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
+@click.option('--output', '-o', 'output_format',
+              help="Output format",
+              type=click.Choice(['json', 'none']),
+              default='json')
+@click.option('--query', '-q',
+              help="JMESPath query to apply to the result",
+              default=None)
 @click.pass_context
 @pass_workspace_context
-def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Context, etag, enable, wait_for_completion, suppress_output: bool = False):
+def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Context, etag, enable, wait_for_completion, output_format, query, suppress_output: bool = False):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -57,9 +65,8 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
         headers={'etag': etag},
         json_data={'isEnabled': enable})
     if wait_for_completion:
-        ctx.obj = WorkspaceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(workspace_operation_show, wait_for_completion=True, suppress_output=suppress_output)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
     else:
         if not suppress_output:
             click.echo(response.text + '\n')
@@ -75,9 +82,16 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
               help="Disable before deleting if not currently enabled",
               flag_value=True,
               default=False)
+@click.option('--output', '-o', 'output_format',
+              help="Output format",
+              type=click.Choice(['json', 'none']),
+              default='json')
+@click.option('--query', '-q',
+              help="JMESPath query to apply to the result",
+              default=None)
 @ click.pass_context
 @ pass_workspace_context
-def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, yes, wait_for_completion, ensure_disabled):
+def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, yes, wait_for_completion, ensure_disabled, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -105,9 +119,8 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
     click.echo("Deleting workspace...", err=True)
     response = client.call_api(log, 'DELETE', f'/api/workspaces/{workspace_id}')
     if wait_for_completion:
-        ctx.obj = WorkspaceOperationContext.from_operation_response(response)
-        click.echo("Waiting for completion...", err=True)
-        ctx.invoke(workspace_operation_show, wait_for_completion=True)
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
         click.echo(response.text + '\n')
 
