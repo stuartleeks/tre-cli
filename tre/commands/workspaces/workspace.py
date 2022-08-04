@@ -3,12 +3,12 @@ import logging
 
 from tre.api_client import ApiClient
 from tre.commands.operation import operation_show
-from .workspace_contexts import pass_workspace_context, WorkspaceContext
+from .contexts import pass_workspace_context, WorkspaceContext
 
-from .workspace_workspace_service import workspace_workspace_service
-from .workspace_workspace_services import workspace_workspace_services
-from .workspace_operation import workspace_operation
-from .workspace_operations import workspace_operations
+from .workspace_services.workspace_service import workspace_workspace_service
+from .workspace_services.workspace_services import workspace_workspace_services
+from .operation import workspace_operation
+from .operations import workspace_operations
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual workspace")

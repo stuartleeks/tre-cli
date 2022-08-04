@@ -3,7 +3,7 @@ import click
 from tre.api_client import ApiClient
 from tre.output import output
 
-from .shared_service_contexts import SharedServiceContext, pass_shared_service_context
+from .contexts import SharedServiceContext, pass_shared_service_context
 
 
 @click.group(name="operations", help="List operations ")

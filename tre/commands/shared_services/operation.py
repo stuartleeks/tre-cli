@@ -3,7 +3,7 @@ import click
 
 from tre.commands.operation import operation_show
 
-from .shared_service_contexts import pass_shared_service_operation_context, SharedServiceOperationContext
+from .contexts import pass_shared_service_operation_context, SharedServiceOperationContext
 
 
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")

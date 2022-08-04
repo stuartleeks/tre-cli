@@ -3,7 +3,7 @@ import click
 from tre.api_client import ApiClient
 from tre.output import output
 
-from .workspace_contexts import WorkspaceContext, pass_workspace_context
+from .contexts import WorkspaceContext, pass_workspace_context
 
 
 @click.group(name="operations", help="List operations ")

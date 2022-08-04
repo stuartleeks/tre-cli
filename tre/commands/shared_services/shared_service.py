@@ -4,10 +4,10 @@ import logging
 from tre.api_client import ApiClient
 from tre.commands.operation import operation_show
 from tre.output import output
-from .shared_service_contexts import pass_shared_service_context, SharedServiceContext
+from .contexts import pass_shared_service_context, SharedServiceContext
 
-from .shared_service_operation import shared_service_operation
-from .shared_service_operations import shared_service_operations
+from .operation import shared_service_operation
+from .operations import shared_service_operations
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual shared_service")

@@ -2,7 +2,7 @@ import logging
 import click
 from tre.commands.operation import operation_show
 
-from .workspace_contexts import pass_workspace_operation_context, WorkspaceOperationContext
+from .contexts import pass_workspace_operation_context, WorkspaceOperationContext
 
 
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")
