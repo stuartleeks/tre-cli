@@ -18,7 +18,7 @@ def shared_service(ctx: click.Context, shared_service_id: str) -> None:
 
 
 @click.command(name="show", help="Show a shared_service")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_shared_service_context
 def shared_service_show(shared_service_context: SharedServiceContext, output_format, query):
@@ -30,7 +30,11 @@ def shared_service_show(shared_service_context: SharedServiceContext, output_for
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(log, 'GET', f'/api/shared-services/{shared_service_id}', )
-    output(response.text, output_format=output_format, query=query)
+    output(response.text, output_format=output_format, query=query, default_table_query=r"sharedServices[].{id:id,name:templateName, version:templateVersion, is_enabled:isEnabled, status: deploymentStatus}")
+
+#
+# TODO - add PATCH (and ?set-enabled)
+#
 
 
 @click.command(name="invoke-action", help="Invoke an action on a shared_service")
@@ -38,7 +42,7 @@ def shared_service_show(shared_service_context: SharedServiceContext, output_for
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @click.pass_context
 @pass_shared_service_context
@@ -69,7 +73,7 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
               flag_value=True,
               default=False)
 @click.pass_context
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_shared_service_context
 def shared_service_delete(shared_service_context: SharedServiceContext, ctx: click.Context, yes, wait_for_completion, output_format, query):

@@ -2,7 +2,8 @@ import click
 import logging
 
 from tre.api_client import ApiClient
-from tre.commands.operation import operation_show
+from tre.commands.operation import default_operation_table_query, operation_show
+from tre.output import output
 from .contexts import pass_workspace_context, WorkspaceContext
 
 from .workspace_services.workspace_service import workspace_workspace_service
@@ -19,8 +20,10 @@ def workspace(ctx: click.Context, workspace_id: str) -> None:
 
 
 @click.command(name="show", help="Show a workspace")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
+@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @pass_workspace_context
-def workspace_show(workspace_context: WorkspaceContext):
+def workspace_show(workspace_context: WorkspaceContext, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -29,7 +32,13 @@ def workspace_show(workspace_context: WorkspaceContext):
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(log, 'GET', f'/api/workspaces/{workspace_id}', )
-    click.echo(response.text + '\n')
+
+    output(
+        response.text,
+        output_format=output_format,
+        query=query,
+        default_table_query=r"workspace.{id:id, display_name:properties.display_name, deployment_status:deploymentStatus, workspace_url:workspaceURL}")
+    return response.text
 
 
 @click.command(name="set-enabled", help="Enable/disable a workspace")
@@ -42,7 +51,7 @@ def workspace_show(workspace_context: WorkspaceContext):
               default=False)
 @click.option('--output', '-o', 'output_format',
               help="Output format",
-              type=click.Choice(['json', 'none']),
+              type=click.Choice(['table', 'json', 'none']),
               default='json')
 @click.option('--query', '-q',
               help="JMESPath query to apply to the result",
@@ -69,7 +78,7 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
     else:
         if not suppress_output:
-            click.echo(response.text + '\n')
+            output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
 
 
 @click.command(name="delete", help="Delete a workspace")
@@ -84,7 +93,7 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
               default=False)
 @click.option('--output', '-o', 'output_format',
               help="Output format",
-              type=click.Choice(['json', 'none']),
+              type=click.Choice(['table', 'json', 'none']),
               default='json')
 @click.option('--query', '-q',
               help="JMESPath query to apply to the result",
@@ -122,7 +131,7 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        click.echo(response.text + '\n')
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
 
 
 workspace.add_command(workspace_show)
@@ -132,3 +141,6 @@ workspace.add_command(workspace_workspace_services)
 workspace.add_command(workspace_workspace_service)
 workspace.add_command(workspace_operations)
 workspace.add_command(workspace_operation)
+
+# TODO - user resource endpoints
+# TODO - airlock endpoints

@@ -13,6 +13,7 @@ def workspace_workspace_service(ctx: click.Context, service_id) -> None:
     ctx.obj = WorkspaceWorkspaceServiceContext.add_service_id_to_context_obj(ctx, service_id)
 
 
+# TODO - table output
 @click.command(name="show", help="Workspace service")
 @click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
@@ -48,3 +49,6 @@ def workspace_workspace_service_show(workspace_workspace_service_context: Worksp
 
 
 workspace_workspace_service.add_command(workspace_workspace_service_show)
+
+
+# TODO - operations endpoints

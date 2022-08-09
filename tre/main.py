@@ -20,5 +20,12 @@ cli.add_command(workspace)
 cli.add_command(shared_services)
 cli.add_command(shared_service)
 
+# TODO - costs endpoints
+# TODO - workspace service endpoints
+# TODO - shared service templates
+# TODO - migrations?
+
+# TODO - allow output format from env var
+
 if __name__ == "__main__":
     cli()

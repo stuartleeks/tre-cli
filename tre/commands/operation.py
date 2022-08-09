@@ -34,6 +34,10 @@ def is_operation_state_success(state: str) -> bool:
     ]
 
 
+def default_operation_table_query():
+    return r"operations[].{id:id, status:status, action:action, resourcePath:resourcePath, message:message}"
+
+
 def operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output: bool = False):
 
     client = ApiClient.get_api_client_from_config()
@@ -61,6 +65,17 @@ def operation_show(log, operation_url, wait_for_completion, output_format, query
         state = response_json['operation']['status']
 
     if not suppress_output:
-        output(response.text, output_format=output_format, query=query)
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
 
     return response.text
+
+
+def operations_list(log, operations_url, output_format, query):
+    client = ApiClient.get_api_client_from_config()
+
+    response = client.call_api(
+        log,
+        'GET',
+        operations_url,
+    )
+    output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())

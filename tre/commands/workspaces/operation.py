@@ -19,7 +19,7 @@ def workspace_operation(ctx: click.Context, operation_id) -> None:
               default=False)
 @click.option('--output', '-o', 'output_format',
               help="Output format",
-              type=click.Choice(['json', 'none']),
+              type=click.Choice(['table', 'json', 'none']),
               default='json')
 @click.option('--query', '-q',
               help="JMESPath query to apply to the result",

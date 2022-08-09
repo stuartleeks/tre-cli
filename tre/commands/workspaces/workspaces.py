@@ -3,7 +3,7 @@ import json
 import logging
 
 from tre.api_client import ApiClient
-from tre.commands.operation import operation_show
+from tre.commands.operation import default_operation_table_query, operation_show
 from tre.output import output
 
 
@@ -13,14 +13,18 @@ def workspaces() -> None:
 
 
 @click.command(name="list", help="List workspaces")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 def workspaces_list(output_format, query):
     log = logging.getLogger(__name__)
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(log, 'GET', '/api/workspaces')
-    output(response.text, output_format=output_format, query=query)
+    output(
+        response.text,
+        output_format=output_format,
+        query=query,
+        default_table_query=r"workspaces[].{id:id, display_name:properties.display_name, deployment_status:deploymentStatus, workspace_url:workspaceURL}")
     return response.text
 
 
@@ -30,7 +34,7 @@ def workspaces_list(output_format, query):
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
+@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
 @click.pass_context
 def workspaces_create(ctx, definition, definition_file, wait_for_completion, output_format, query):
@@ -51,7 +55,7 @@ def workspaces_create(ctx, definition, definition_file, wait_for_completion, out
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        output(response.text, output_format=output_format, query=query)
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
         return response.text
 
 

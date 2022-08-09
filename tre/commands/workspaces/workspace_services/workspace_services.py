@@ -11,6 +11,7 @@ def workspace_workspace_services():
     pass
 
 
+# TODO - table output
 @click.command(name="list", help="List workspace services")
 @click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
 @click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
