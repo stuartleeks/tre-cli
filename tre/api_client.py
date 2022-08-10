@@ -88,7 +88,7 @@ class ApiClient:
         raise RuntimeError("Failed to get auth token")
 
     @staticmethod
-    def get_api_client_from_config() -> Response:
+    def get_api_client_from_config() -> "ApiClient":
 
         config_path = Path("~/.config/tre/environment.json").expanduser()
         if not config_path.exists():
@@ -148,3 +148,13 @@ class ApiClient:
                 }
                 raise ApiException(message=json.dumps(error_info, indent=2))
             return response
+
+    def get_workspace_scope(self, log, workspace_id: str):
+        workspace_response = self.call_api(
+            log,
+            "GET",
+            f'/api/workspaces/{workspace_id}',
+        )
+        workspace_json = workspace_response.json()
+        workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
+        return workspace_scope

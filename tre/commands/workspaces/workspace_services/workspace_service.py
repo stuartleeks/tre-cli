@@ -29,14 +29,7 @@ def workspace_workspace_service_show(workspace_workspace_service_context: Worksp
         raise click.UsageError('Missing service ID')
 
     client = ApiClient.get_api_client_from_config()
-
-    workspace_response = client.call_api(
-        log,
-        "GET",
-        f'/api/workspaces/{workspace_id}',
-    )
-    workspace_json = workspace_response.json()
-    workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
+    workspace_scope = client.get_workspace_scope(log, workspace_id)
 
     response = client.call_api(
         log,

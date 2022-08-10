@@ -2,8 +2,8 @@ import logging
 import click
 
 from tre.api_client import ApiClient
-from tre.output import output
 from tre.commands.workspaces.contexts import pass_workspace_context
+from tre.output import output
 
 
 @click.group(name="workspace-services", help="List workspace-services ")
@@ -25,13 +25,7 @@ def workspace_workspace_services_list(workspace_context, output_format, query):
 
     client = ApiClient.get_api_client_from_config()
 
-    workspace_response = client.call_api(
-        log,
-        "GET",
-        f'/api/workspaces/{workspace_id}',
-    )
-    workspace_json = workspace_response.json()
-    workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
+    workspace_scope = client.get_workspace_scope(log, workspace_id)
 
     response = client.call_api(
         log,

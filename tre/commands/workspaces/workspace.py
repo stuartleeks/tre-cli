@@ -6,10 +6,11 @@ from tre.commands.operation import default_operation_table_query, operation_show
 from tre.output import output
 from .contexts import pass_workspace_context, WorkspaceContext
 
-from .workspace_services.workspace_service import workspace_workspace_service
-from .workspace_services.workspace_services import workspace_workspace_services
 from .operation import workspace_operation
 from .operations import workspace_operations
+from .workspace_services.workspace_service import workspace_workspace_service
+from .workspace_services.workspace_services import workspace_workspace_services
+from .airlock.requests import airlocks
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual workspace")
@@ -137,10 +138,12 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
 workspace.add_command(workspace_show)
 workspace.add_command(workspace_set_enabled)
 workspace.add_command(workspace_delete)
-workspace.add_command(workspace_workspace_services)
-workspace.add_command(workspace_workspace_service)
 workspace.add_command(workspace_operations)
 workspace.add_command(workspace_operation)
 
 # TODO - user resource endpoints
-# TODO - airlock endpoints
+
+workspace.add_command(workspace_workspace_services)
+workspace.add_command(workspace_workspace_service)
+
+workspace.add_command(airlocks)
