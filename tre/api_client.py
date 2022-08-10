@@ -1,3 +1,4 @@
+import sys
 import click
 import json
 import msal
@@ -27,66 +28,11 @@ class ApiException(click.ClickException):
 class ApiClient:
     def __init__(self,
                  base_url: str,
-                 get_auth_token: "Callable[[Logger, str], str]",
                  verify: bool):
         self.base_url = base_url
         self.verify = verify
-        self.get_auth_token = get_auth_token
 
     @staticmethod
-    def get_auth_token_client_credentials(log: Logger,
-                                          client_id: str,
-                                          client_secret: str,
-                                          aad_tenant_id: str,
-                                          api_scope: str):
-        with Client() as client:
-            headers = {'Content-Type': "application/x-www-form-urlencoded"}
-            # Use Client Credentials flow
-            payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope={api_scope}/.default"
-            url = f"https://login.microsoftonline.com/{aad_tenant_id}/oauth2/v2.0/token"
-
-            log.debug('POSTing to token endpoint')
-            response = client.post(url, headers=headers, content=payload)
-            try:
-                if response.status_code == 200:
-                    log.debug('Parsing response')
-                    response_json = response.json()
-                    token = response_json["access_token"]
-                    return token
-                msg = f"Sign-in failed: {response.status_code}: {response.text}"
-                log.error(msg)
-                raise RuntimeError(msg)
-            except json.JSONDecodeError:
-                log.debug(
-                    f'Failed to parse response as JSON: {response.content}')
-
-        raise RuntimeError("Failed to get auth token")
-
-    @staticmethod
-    def get_auth_token_msal(log: Logger,
-                            token_cache_file: str,
-                            client_id: str,
-                            aad_tenant_id: str,
-                            scope: str):
-
-        cache = msal.SerializableTokenCache()
-        if os.path.exists(token_cache_file):
-            cache.deserialize(open(token_cache_file, "r").read())
-
-        app = msal.PublicClientApplication(
-            client_id=client_id,
-            authority=f"https://login.microsoftonline.com/{aad_tenant_id}",
-            token_cache=cache)
-
-        accounts = app.get_accounts()
-        if accounts:
-            auth_result = app.acquire_token_silent(scopes=[scope], account=accounts[0])
-            if cache.has_state_changed:
-                open(token_cache_file, "w").write(cache.serialize())
-            return auth_result["access_token"]
-
-        raise RuntimeError("Failed to get auth token")
-
     @staticmethod
     def get_api_client_from_config() -> "ApiClient":
 
@@ -101,31 +47,25 @@ class ApiClient:
 
         login_method = config["login-method"]
         if login_method == "client-credentials":
-            def get_auth_token(log, scope):
-                return ApiClient.get_auth_token_client_credentials(
-                    log,
-                    config["client-id"],
-                    config["client-secret"],
-                    config["aad-tenant-id"],
-                    scope or config["api-scope"]
-                )
+            return ClientCredentialsApiClient(
+                config["base-url"],
+                config["verify"],
+                config["client-id"],
+                config["client-secret"],
+                config["aad-tenant-id"],
+                config["api-scope"]
+            )
         elif login_method == "device-code":
-            def get_auth_token(log, scope):
-                return ApiClient.get_auth_token_msal(
-                    log,
-                    config["token-cache-file"],
-                    config["client-id"],
-                    config["aad-tenant-id"],
-                    scope or config["api-scope"]
-                )
+            return DeviceCodeApiClient(
+                config["base-url"],
+                config["verify"],
+                config["token-cache-file"],
+                config["client-id"],
+                config["aad-tenant-id"],
+                config["api-scope"]
+            )
         else:
             raise click.ClickException(f"Unhandled login method: {login_method}")
-
-        return ApiClient(
-            config["base-url"],
-            get_auth_token,
-            config["verify"],
-        )
 
     def call_api(
         self,
@@ -149,7 +89,7 @@ class ApiClient:
                 raise ApiException(message=json.dumps(error_info, indent=2))
             return response
 
-    def get_workspace_scope(self, log, workspace_id: str):
+    def get_workspace_scope(self, log, workspace_id: str) -> str:
         workspace_response = self.call_api(
             log,
             "GET",
@@ -158,3 +98,79 @@ class ApiClient:
         workspace_json = workspace_response.json()
         workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
         return workspace_scope
+
+
+class ClientCredentialsApiClient(ApiClient):
+    def __init__(self,
+                 base_url: str,
+                 verify: bool,
+                 client_id: str,
+                 client_secret: str,
+                 aad_tenant_id: str,
+                 scope: str):
+        super().__init__(base_url, verify)
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._aad_tenant_id = aad_tenant_id
+        self._scope = scope
+
+    def get_auth_token(self, log, scope):
+        with Client() as client:
+            headers = {'Content-Type': "application/x-www-form-urlencoded"}
+            # Use Client Credentials flow
+            payload = f"grant_type=client_credentials&client_id={self._client_id}&client_secret={self._client_secret}&scope={scope or self._scope}/.default"
+            url = f"https://login.microsoftonline.com/{self._aad_tenant_id}/oauth2/v2.0/token"
+
+            log.debug('POSTing to token endpoint')
+            response = client.post(url, headers=headers, content=payload)
+            try:
+                if response.status_code == 200:
+                    log.debug('Parsing response')
+                    response_json = response.json()
+                    token = response_json["access_token"]
+                    return token
+                msg = f"Sign-in failed: {response.status_code}: {response.text}"
+                log.error(msg)
+                raise RuntimeError(msg)
+            except json.JSONDecodeError:
+                log.debug(
+                    f'Failed to parse response as JSON: {response.content}')
+
+        raise RuntimeError("Failed to get auth token")
+
+
+class DeviceCodeApiClient(ApiClient):
+    def __init__(self,
+                 base_url: str,
+                 verify: bool,
+                 token_cache_file: str,
+                 client_id: str,
+                 aad_tenant_id: str,
+                 scope: str):
+        super().__init__(base_url, verify)
+        self._token_cache_file = token_cache_file
+        self._client_id = client_id
+        self._aad_tenant_id = aad_tenant_id
+        self._scope = scope
+
+    def get_auth_token(self, log, scope):
+
+        cache = msal.SerializableTokenCache()
+        if os.path.exists(self._token_cache_file):
+            cache.deserialize(open(self._token_cache_file, "r").read())
+
+        app = msal.PublicClientApplication(
+            client_id=self._client_id,
+            authority=f"https://login.microsoftonline.com/{self._aad_tenant_id}",
+            token_cache=cache)
+
+        accounts = app.get_accounts()
+        if accounts:
+            auth_result = app.acquire_token_silent(scopes=[scope or self._scope], account=accounts[0])
+            if cache.has_state_changed:
+                with open(self._token_cache_file, "w") as cache_file:
+                    cache_file.write(cache.serialize())
+            if auth_result is not None:
+                return auth_result["access_token"]
+
+        raise RuntimeError(f"Failed to get auth token for scope '{scope}'")
