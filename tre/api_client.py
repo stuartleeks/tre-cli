@@ -97,7 +97,7 @@ class ApiClient:
         )
         workspace_json = workspace_response.json()
         workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
-        return workspace_scope
+        return workspace_scope + "/user_impersonation"
 
 
 class ClientCredentialsApiClient(ApiClient):
@@ -155,6 +155,8 @@ class DeviceCodeApiClient(ApiClient):
 
     def get_auth_token(self, log, scope):
 
+        effective_scope = scope or self._scope
+
         cache = msal.SerializableTokenCache()
         if os.path.exists(self._token_cache_file):
             cache.deserialize(open(self._token_cache_file, "r").read())
@@ -166,11 +168,25 @@ class DeviceCodeApiClient(ApiClient):
 
         accounts = app.get_accounts()
         if accounts:
-            auth_result = app.acquire_token_silent(scopes=[scope or self._scope], account=accounts[0])
+            auth_result = app.acquire_token_silent(scopes=[effective_scope], account=accounts[0])
             if cache.has_state_changed:
                 with open(self._token_cache_file, "w") as cache_file:
                     cache_file.write(cache.serialize())
             if auth_result is not None:
                 return auth_result["access_token"]
+
+        if sys.stdin.isatty():
+            # We have TTY - try interactive acquire :-)
+            click.echo(f"No cached token - initiating device code flow for scope '{effective_scope}'")
+            flow = app.initiate_device_flow(scopes=[effective_scope])
+            if "user_code" not in flow:
+                raise click.ClickException("unable to initiate device flow")
+
+            click.echo(flow['message'], err=True)
+            app.acquire_token_by_device_flow(flow)
+
+            if cache.has_state_changed:
+                with open(self._token_cache_file, "w") as cache_file:
+                    cache_file.write(cache.serialize())
 
         raise RuntimeError(f"Failed to get auth token for scope '{scope}'")

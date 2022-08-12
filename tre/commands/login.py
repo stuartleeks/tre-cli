@@ -31,7 +31,22 @@ def login():
 @click.option('--verify/--no-verify',
               help='Enable/disable SSL verification',
               default=True)
-def login_device_code(base_url: str, client_id: str, aad_tenant_id: str, api_scope: str, verify: bool):
+@click.option('--workspace', "workspaces",
+              required=False,
+              help='Additionally log in to workspace with specified id (can be specified multiple times).',
+              multiple=True)
+@click.option('--all-workspaces',
+              required=False,
+              default=False,
+              is_flag=True,
+              help='Additionally log in to all current workspaces (not compatible with --workspace)')
+def login_device_code(base_url: str, client_id: str, aad_tenant_id: str, api_scope: str, verify: bool, workspaces: list[str], all_workspaces):
+    log = logging.getLogger(__name__)
+
+    if workspaces is not None and len(workspaces) > 0:
+        if all_workspaces:
+            raise click.ClickException("Cannot use `--all-workspaces and --workspace")
+
     # Set up token cache
     Path('~/.config/tre').expanduser().mkdir(parents=True, exist_ok=True)
     token_cache_file = Path('~/.config/tre/token_cache.json').expanduser()
@@ -68,31 +83,61 @@ def login_device_code(base_url: str, client_id: str, aad_tenant_id: str, api_sco
         encoding='utf-8')
 
     # Save the token cache
-    open(token_cache_file, "w").write(cache.serialize()) if cache.has_state_changed else None
+    if cache.has_state_changed:
+        with open(token_cache_file, "w") as cache_file:
+            cache_file.write(cache.serialize())
+
+    client = None
+
+    if all_workspaces:
+        click.echo("Getting current workspaces: ...")
+        client = ApiClient.get_api_client_from_config()
+        response = client.call_api(log, "GET", "/api/workspaces")
+        if not response.is_success:
+            raise click.ClickException(f"Failed to list workspaces: {response.text}")
+        workspaces = [workspace["id"] for workspace in response.json()["workspaces"] if "scope_id" in workspace["properties"]]
+
+    if workspaces is not None and len(workspaces) > 0:
+        click.echo(f"Logging in to workspaces: {workspaces}...")
+        if client is None:
+            client = ApiClient.get_api_client_from_config()
+
+        workspace_scopes = [client.get_workspace_scope(log, workspace) for workspace in workspaces]
+
+        flow = app.initiate_device_flow(scopes=[api_scope] + workspace_scopes)
+        if "user_code" not in flow:
+            raise click.ClickException("unable to initiate device flow")
+
+        click.echo(flow['message'])
+        app.acquire_token_by_device_flow(flow)
+
+        if cache.has_state_changed:
+            with open(token_cache_file, "w") as cache_file:
+                cache_file.write(cache.serialize())
 
     click.echo("Successfully logged in")
 
 
-@click.command(name="client-credentials", help="Use client credentials flow (client ID + secret) to authenticate")
-@click.option('--base-url',
-              required=True,
-              help='The TRE base URL, e.g. '
-              + 'https://<id>.<location>.cloudapp.azure.com/')
-@click.option('--client-id',
-              required=True,
-              help='The Client ID to use for authenticating')
-@click.option('--client-secret',
-              required=True,
-              help='The Client Secret to use for authenticating')
-@click.option('--aad-tenant-id',
-              required=True,
-              help='The Tenant ID for the AAD tenant to authenticate with')
-@click.option('--api-scope',
-              required=True,
-              help='The API scope for the base API')
-@click.option('--verify/--no-verify',
-              help='Enable/disable SSL verification',
-              default=True)
+@ click.command(name="client-credentials", help="Use client credentials flow (client ID + secret) to authenticate")
+@ click.option('--base-url',
+               required=True,
+               help='The TRE base URL, e.g. '
+               + 'https://<id>.<location>.cloudapp.azure.com/')
+@ click.option('--client-id',
+               required=True,
+               help='The Client ID to use for authenticating')
+@ click.option('--client-secret',
+               required=True,
+               help='The Client Secret to use for authenticating')
+@ click.option('--aad-tenant-id',
+               required=True,
+               help='The Tenant ID for the AAD tenant to authenticate with')
+@ click.option('--api-scope',
+               required=True,
+               help='The API scope for the base API')
+@ click.option('--verify/--no-verify',
+               help='Enable/disable SSL verification',
+               default=True)
 def login_client_credentials(base_url: str, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str, verify: bool):
     log = logging.getLogger(__name__)
     # Test the auth succeeds

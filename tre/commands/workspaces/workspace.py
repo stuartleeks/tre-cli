@@ -11,6 +11,7 @@ from .operations import workspace_operations
 from .workspace_services.workspace_service import workspace_workspace_service
 from .workspace_services.workspace_services import workspace_workspace_services
 from .airlock.requests import airlocks
+from .airlock.request import airlock
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual workspace")
@@ -146,4 +147,5 @@ workspace.add_command(workspace_operation)
 workspace.add_command(workspace_workspace_services)
 workspace.add_command(workspace_workspace_service)
 
+workspace.add_command(airlock)
 workspace.add_command(airlocks)
