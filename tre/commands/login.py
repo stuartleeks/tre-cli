@@ -118,26 +118,26 @@ def login_device_code(base_url: str, client_id: str, aad_tenant_id: str, api_sco
     click.echo("Successfully logged in")
 
 
-@ click.command(name="client-credentials", help="Use client credentials flow (client ID + secret) to authenticate")
-@ click.option('--base-url',
-               required=True,
-               help='The TRE base URL, e.g. '
-               + 'https://<id>.<location>.cloudapp.azure.com/')
-@ click.option('--client-id',
-               required=True,
-               help='The Client ID to use for authenticating')
-@ click.option('--client-secret',
-               required=True,
-               help='The Client Secret to use for authenticating')
-@ click.option('--aad-tenant-id',
-               required=True,
-               help='The Tenant ID for the AAD tenant to authenticate with')
-@ click.option('--api-scope',
-               required=True,
-               help='The API scope for the base API')
-@ click.option('--verify/--no-verify',
-               help='Enable/disable SSL verification',
-               default=True)
+@click.command(name="client-credentials", help="Use client credentials flow (client ID + secret) to authenticate")
+@click.option('--base-url',
+              required=True,
+              help='The TRE base URL, e.g. '
+              + 'https://<id>.<location>.cloudapp.azure.com/')
+@click.option('--client-id',
+              required=True,
+              help='The Client ID to use for authenticating')
+@click.option('--client-secret',
+              required=True,
+              help='The Client Secret to use for authenticating')
+@click.option('--aad-tenant-id',
+              required=True,
+              help='The Tenant ID for the AAD tenant to authenticate with')
+@click.option('--api-scope',
+              required=True,
+              help='The API scope for the base API')
+@click.option('--verify/--no-verify',
+              help='Enable/disable SSL verification',
+              default=True)
 def login_client_credentials(base_url: str, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str, verify: bool):
     log = logging.getLogger(__name__)
     # Test the auth succeeds

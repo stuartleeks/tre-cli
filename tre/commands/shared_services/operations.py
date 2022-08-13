@@ -1,6 +1,7 @@
 import logging
 import click
 from tre.commands.operation import operations_list
+from tre.output import output_option, query_option
 
 from .contexts import SharedServiceContext, pass_shared_service_context
 
@@ -11,8 +12,8 @@ def shared_service_operations():
 
 
 @click.command(name="list", help="List shared_service operations")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_shared_service_context
 def shared_service_operations_list(shared_service_context: SharedServiceContext, output_format, query):
     log = logging.getLogger(__name__)

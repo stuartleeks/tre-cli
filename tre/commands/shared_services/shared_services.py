@@ -4,7 +4,7 @@ import logging
 
 from tre.api_client import ApiClient
 from tre.commands.operation import default_operation_table_query, operation_show
-from tre.output import output
+from tre.output import output, output_option, query_option
 
 
 @click.group(help="List/add shared_services")
@@ -13,8 +13,8 @@ def shared_services() -> None:
 
 
 @click.command(name="list", help="List shared_services")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 def shared_services_list(output_format, query):
     log = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ def shared_services_list(output_format, query):
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @click.pass_context
 def shared_services_create(ctx, definition, definition_file, wait_for_completion, output_format, query):
     log = logging.getLogger(__name__)
