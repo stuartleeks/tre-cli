@@ -8,8 +8,20 @@ from tre.output import output
 _default_table_query_item = r"airlockRequest.{id:id,workspace_id:workspaceId,type:requestType,status:status,business_justification:businessJustification}"
 
 
+def airlock_id_completion(ctx: click.Context, param, incomplete):
+    log = logging.getLogger(__name__)
+    parent_ctx = ctx.parent
+    workspace_id = parent_ctx.params["workspace_id"]
+    client = ApiClient.get_api_client_from_config()
+    workspace_scope = client.get_workspace_scope(log, workspace_id)
+    response = client.call_api(log, 'GET', f'/api/workspaces/{workspace_id}/requests', scope_id=workspace_scope)
+    if response.is_success:
+        ids = [workspace["id"] for workspace in response.json()["airlockRequests"]]
+        return [id for id in ids if id.startswith(incomplete)]
+
+
 @click.group(invoke_without_command=True, help="Perform actions on an airlock request")
-@click.argument('airlock_id', required=True)
+@click.argument('airlock_id', required=True, shell_complete=airlock_id_completion)
 @click.pass_context
 def airlock(ctx: click.Context, airlock_id: str) -> None:
     ctx.obj = WorkspaceAirlockContext.add_airlock_id_to_context_obj(ctx, airlock_id)
