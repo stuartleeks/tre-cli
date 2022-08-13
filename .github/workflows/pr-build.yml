@@ -29,4 +29,4 @@ jobs:
           imageName: ghcr.io/stuartleeks/tre-cli/tre-cli-devcontainer
           runCmd: make install-cli && source <(_TRE_COMPLETE=bash_source tre) && tre --help
           push: filter
-          refFilterForPush: refs/head/main
+          refFilterForPush: refs/heads/main
