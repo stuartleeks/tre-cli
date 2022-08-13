@@ -1,10 +1,9 @@
-import json
 import click
 import logging
 
 from tre.api_client import ApiClient
 from tre.commands.workspaces.contexts import pass_workspace_context
-from tre.output import output
+from tre.output import output, output_option, query_option
 
 _default_table_query_list = r"airlockRequests[].{id:id,workspace_id:workspaceId,type:requestType,status:status,business_justification:businessJustification}"
 _default_table_query_item = r"airlockRequest.{id:id,workspace_id:workspaceId,type:requestType,status:status,business_justification:businessJustification}"
@@ -16,8 +15,8 @@ def airlocks() -> None:
 
 
 @click.command(name="list", help="List airlocks")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_context
 def airlocks_list(workspace_context, output_format, query):
     log = logging.getLogger(__name__)
@@ -41,8 +40,8 @@ def airlocks_list(workspace_context, output_format, query):
 @click.command(name="new", help="Create a new airlock request")
 @click.option('--type', "request_type", help='The type of request', required=True, type=click.Choice(['import', 'export']))
 @click.option('--justification', help='Business justification for the request', required=True)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_context
 def airlock_create(workspace_context, request_type, justification, output_format, query):
     log = logging.getLogger(__name__)

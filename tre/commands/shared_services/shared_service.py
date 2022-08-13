@@ -3,7 +3,7 @@ import logging
 
 from tre.api_client import ApiClient
 from tre.commands.operation import operation_show
-from tre.output import output
+from tre.output import output, output_option, query_option
 from .contexts import pass_shared_service_context, SharedServiceContext
 
 from .operation import shared_service_operation
@@ -18,8 +18,8 @@ def shared_service(ctx: click.Context, shared_service_id: str) -> None:
 
 
 @click.command(name="show", help="Show a shared_service")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_shared_service_context
 def shared_service_show(shared_service_context: SharedServiceContext, output_format, query):
     log = logging.getLogger(__name__)
@@ -42,8 +42,8 @@ def shared_service_show(shared_service_context: SharedServiceContext, output_for
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @click.pass_context
 @pass_shared_service_context
 def shared_service_invoke_action(shared_service_context: SharedServiceContext, ctx: click.Context, action_name, wait_for_completion, output_format, query):
@@ -73,8 +73,8 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
               flag_value=True,
               default=False)
 @click.pass_context
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_shared_service_context
 def shared_service_delete(shared_service_context: SharedServiceContext, ctx: click.Context, yes, wait_for_completion, output_format, query):
     log = logging.getLogger(__name__)

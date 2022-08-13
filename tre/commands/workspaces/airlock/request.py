@@ -3,7 +3,7 @@ import logging
 
 from tre.api_client import ApiClient
 from tre.commands.workspaces.airlock.contexts import WorkspaceAirlockContext, pass_workspace_airlock_context
-from tre.output import output
+from tre.output import output, output_option, query_option
 
 _default_table_query_item = r"airlockRequest.{id:id,workspace_id:workspaceId,type:requestType,status:status,business_justification:businessJustification}"
 
@@ -28,8 +28,8 @@ def airlock(ctx: click.Context, airlock_id: str) -> None:
 
 
 @click.command(name="show", help="Show airlock request")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_airlock_context
 def airlock_show(airlock_context: WorkspaceAirlockContext, output_format, query) -> None:
     log = logging.getLogger(__name__)
@@ -55,8 +55,8 @@ def airlock_show(airlock_context: WorkspaceAirlockContext, output_format, query)
 
 
 @click.command(name="get-url", help="Get URL to access airlock request")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['table', 'json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_airlock_context
 def airlock_get_url(airlock_context: WorkspaceAirlockContext, output_format, query) -> None:
     log = logging.getLogger(__name__)
@@ -81,10 +81,10 @@ def airlock_get_url(airlock_context: WorkspaceAirlockContext, output_format, que
     output(response.text, output_format=output_format, query=query, default_table_query=r"{container_url:containerUrl}")
 
 
-# TODO table output
+# TODO table output default
 @click.command(name="submit", help="Submit an airlock request (after uploading content)")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_airlock_context
 def airlock_submit(airlock_context: WorkspaceAirlockContext, output_format, query) -> None:
     log = logging.getLogger(__name__)
@@ -109,12 +109,12 @@ def airlock_submit(airlock_context: WorkspaceAirlockContext, output_format, quer
     output(response.text, output_format=output_format, query=query)
 
 
-# TODO table output
+# TODO table output default
 @click.command(name="review", help="Provide a review response for an airlock request")
 @click.option('--approve/--reject', 'approve', required=True, help="Approved/rejected")
 @click.option('--reason', required=True, help="Reason for approval/rejection")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_airlock_context
 def airlock_review(airlock_context: WorkspaceAirlockContext, approve, reason, output_format, query) -> None:
     log = logging.getLogger(__name__)

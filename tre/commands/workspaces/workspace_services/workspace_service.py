@@ -1,7 +1,7 @@
 import logging
 import click
 from tre.api_client import ApiClient
-from tre.output import output
+from tre.output import output, output_option, query_option
 
 from .contexts import WorkspaceWorkspaceServiceContext, pass_workspace_workspace_service_context
 
@@ -15,8 +15,8 @@ def workspace_workspace_service(ctx: click.Context, service_id) -> None:
 
 # TODO - table output
 @click.command(name="show", help="Workspace service")
-@click.option('--output', '-o', 'output_format', default='json', type=click.Choice(['json', 'none']), help="Output format")
-@click.option('--query', '-q', default=None, help="JMESPath query to apply to the result")
+@output_option()
+@query_option()
 @pass_workspace_workspace_service_context
 def workspace_workspace_service_show(workspace_workspace_service_context: WorkspaceWorkspaceServiceContext, output_format, query) -> None:
     log = logging.getLogger(__name__)

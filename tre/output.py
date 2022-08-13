@@ -1,6 +1,7 @@
 import click
 import jmespath
 import json
+import typing as t
 from tabulate import tabulate
 
 from enum import Enum
@@ -11,6 +12,21 @@ class OutputFormat(Enum):
     Suppress = 'none'
     Json = 'json'
     Table = 'table'
+
+
+def output_option(*param_decls: str, **kwargs: t.Any):
+    param_decls = ('--output', '-o', 'output_format')
+    kwargs.setdefault("default", 'json')
+    kwargs.setdefault("type", click.Choice(['table', 'json', 'none']))
+    kwargs.setdefault("help", "Output format")
+    return click.option(*param_decls, **kwargs)
+
+
+def query_option(*param_decls: str, **kwargs: t.Any):
+    param_decls = ('--query', '-q')
+    kwargs.setdefault("default", None)
+    kwargs.setdefault("help", "JMESPath query to apply to the result")
+    return click.option(*param_decls, **kwargs)
 
 
 def output(result_json, output_format: OutputFormat = OutputFormat.Json, query: str = None, default_table_query: str = None) -> None:

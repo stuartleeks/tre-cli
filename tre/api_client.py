@@ -4,7 +4,6 @@ import json
 import msal
 import os
 
-from typing import Callable
 from httpx import Client, Response
 from logging import Logger
 from pathlib import Path

@@ -1,6 +1,7 @@
 import logging
 import click
 from tre.commands.operation import operation_show
+from tre.output import output_option, query_option
 
 from .contexts import pass_workspace_operation_context, WorkspaceOperationContext
 
@@ -17,13 +18,8 @@ def workspace_operation(ctx: click.Context, operation_id) -> None:
               help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
               flag_value=True,
               default=False)
-@click.option('--output', '-o', 'output_format',
-              help="Output format",
-              type=click.Choice(['table', 'json', 'none']),
-              default='json')
-@click.option('--query', '-q',
-              help="JMESPath query to apply to the result",
-              default=None)
+@output_option()
+@query_option()
 @pass_workspace_operation_context
 def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
