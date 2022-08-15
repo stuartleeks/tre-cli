@@ -28,7 +28,5 @@ cli.add_command(get_token)
 # TODO - shared service templates
 # TODO - migrations?
 
-# TODO - allow output format from env var
-
 if __name__ == "__main__":
     cli()
