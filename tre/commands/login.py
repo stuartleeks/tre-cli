@@ -5,6 +5,7 @@ import msal
 import os
 
 from pathlib import Path
+from httpx import Client
 
 from tre.api_client import ApiClient
 
@@ -118,36 +119,45 @@ def login_device_code(base_url: str, client_id: str, aad_tenant_id: str, api_sco
     click.echo("Successfully logged in")
 
 
-@click.command(name="client-credentials", help="Use client credentials flow (client ID + secret) to authenticate")
-@click.option('--base-url',
-              required=True,
-              help='The TRE base URL, e.g. '
-              + 'https://<id>.<location>.cloudapp.azure.com/')
-@click.option('--client-id',
-              required=True,
-              help='The Client ID to use for authenticating')
-@click.option('--client-secret',
-              required=True,
-              help='The Client Secret to use for authenticating')
-@click.option('--aad-tenant-id',
-              required=True,
-              help='The Tenant ID for the AAD tenant to authenticate with')
-@click.option('--api-scope',
-              required=True,
-              help='The API scope for the base API')
-@click.option('--verify/--no-verify',
-              help='Enable/disable SSL verification',
-              default=True)
-def login_client_credentials(base_url: str, client_id: str, client_secret: str, aad_tenant_id: str, api_scope: str, verify: bool):
+@click.command(
+    name="client-credentials",
+    help="Use client credentials flow (client ID + secret) to authenticate",
+)
+@click.option(
+    "--base-url",
+    required=True,
+    help="The TRE base URL, e.g. " + "https://<id>.<location>.cloudapp.azure.com/",
+)
+@click.option(
+    "--client-id", required=True, help="The Client ID to use for authenticating"
+)
+@click.option(
+    "--client-secret", required=True, help="The Client Secret to use for authenticating"
+)
+@click.option(
+    "--aad-tenant-id",
+    required=True,
+    help="The Tenant ID for the AAD tenant to authenticate with",
+)
+@click.option("--api-scope", required=True, help="The API scope for the base API")
+@click.option(
+    "--verify/--no-verify", help="Enable/disable SSL verification", default=True
+)
+def login_client_credentials(
+    base_url: str,
+    client_id: str,
+    client_secret: str,
+    aad_tenant_id: str,
+    api_scope: str,
+    verify: bool,
+):
     log = logging.getLogger(__name__)
     # Test the auth succeeds
     try:
         log.info("Attempting sign-in...")
-        ApiClient.get_auth_token_client_credentials(log,
-                                                    client_id,
-                                                    client_secret,
-                                                    aad_tenant_id,
-                                                    api_scope)
+        _get_auth_token_client_credentials(
+            log, client_id, client_secret, aad_tenant_id, api_scope
+        )
         log.info("Sign-in successful")
         # TODO make a call against the API to ensure the auth token
         # is valid there (url)
@@ -158,22 +168,54 @@ def login_client_credentials(base_url: str, client_id: str, client_secret: str, 
 
     # Save the auth details to ~/.config/tre/environment.json
     environment_config = {
-        'base-url': base_url,
-        'login-method': 'client-credentials',
-        'client-id': client_id,
-        'client-secret': client_secret,
-        'aad-tenant-id': aad_tenant_id,
-        'api-scope': api_scope,
-        'verify': verify,
+        "base-url": base_url,
+        "login-method": "client-credentials",
+        "client-id": client_id,
+        "client-secret": client_secret,
+        "aad-tenant-id": aad_tenant_id,
+        "api-scope": api_scope,
+        "verify": verify,
     }
 
     # ensure ~/.config/tre folder exists
-    Path('~/.config/tre').expanduser().mkdir(parents=True, exist_ok=True)
-    Path('~/.config/tre/environment.json').expanduser().write_text(
-        json.dumps(environment_config, indent=4),
-        encoding='utf-8')
+    Path("~/.config/tre").expanduser().mkdir(parents=True, exist_ok=True)
+    Path("~/.config/tre/environment.json").expanduser().write_text(
+        json.dumps(environment_config, indent=4), encoding="utf-8"
+    )
 
-    click.echo('Login details saved\n')
+    click.echo("Login details saved\n")
+
+
+def _get_auth_token_client_credentials(
+    log: logging.Logger,
+    client_id: str,
+    client_secret: str,
+    aad_tenant_id: str,
+    api_scope: str,
+):
+    allow_insecure = True  # TODO add option?
+    with Client(verify=not allow_insecure) as client:
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        # Use Client Credentials flow
+        payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope={api_scope}/.default"
+        url = f"https://login.microsoftonline.com/{aad_tenant_id}/oauth2/v2.0/token"
+
+        log.debug("POSTing to token endpoint")
+        response = client.post(url, headers=headers, content=payload)
+        try:
+            if response.status_code == 200:
+                log.debug("Parsing response")
+                response_json = response.json()
+                token = response_json["access_token"]
+                print(token)
+                return token
+            msg = f"Sign-in failed: {response.status_code}: {response.text}"
+            log.error(msg)
+            raise RuntimeError(msg)
+        except json.JSONDecodeError:
+            log.debug(f"Failed to parse response as JSON: {response.content}")
+
+    raise RuntimeError("Failed to get auth token")
 
 
 login.add_command(login_client_credentials)

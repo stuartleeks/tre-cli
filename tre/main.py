@@ -1,5 +1,6 @@
 import click
 
+from tre.commands.get_token import get_token
 from tre.commands.login import login
 from tre.commands.api_call import call_api
 from tre.commands.workspaces.workspace import workspace
@@ -19,6 +20,8 @@ cli.add_command(workspaces)
 cli.add_command(workspace)
 cli.add_command(shared_services)
 cli.add_command(shared_service)
+
+cli.add_command(get_token)
 
 # TODO - costs endpoints
 # TODO - workspace service endpoints
