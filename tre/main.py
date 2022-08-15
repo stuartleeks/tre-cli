@@ -10,6 +10,8 @@ from tre.commands.shared_services.shared_services import shared_services
 
 from tre.commands.workspace_templates.workspace_templates import workspace_templates
 from tre.commands.workspace_templates.workspace_template import workspace_template
+from tre.commands.shared_service_templates.shared_service_templates import shared_service_templates
+from tre.commands.shared_service_templates.shared_service_template import shared_service_template
 
 
 @click.group()
@@ -26,14 +28,16 @@ cli.add_command(shared_service)
 
 cli.add_command(workspace_templates)
 cli.add_command(workspace_template)
+cli.add_command(shared_service_templates)
+cli.add_command(shared_service_template)
 
 cli.add_command(get_token)
 
 # TODO - costs endpoints
 # TODO - workspace service endpoints
-# TODO - shared service templates
 # TODO - workspaces service templates
 # TODO - user resource templates
+# TODO - health
 # TODO - migrations?
 
 if __name__ == "__main__":
