@@ -18,6 +18,7 @@ def output_option(*param_decls: str, **kwargs: t.Any):
     param_decls = ('--output', '-o', 'output_format')
     kwargs.setdefault("default", 'json')
     kwargs.setdefault("type", click.Choice(['table', 'json', 'none']))
+    kwargs.setdefault("envvar", "TRECLI_OUTPUT")
     kwargs.setdefault("help", "Output format")
     return click.option(*param_decls, **kwargs)
 
