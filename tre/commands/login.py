@@ -156,7 +156,7 @@ def login_client_credentials(
     try:
         log.info("Attempting sign-in...")
         _get_auth_token_client_credentials(
-            log, client_id, client_secret, aad_tenant_id, api_scope
+            log, client_id, client_secret, aad_tenant_id, api_scope, verify
         )
         log.info("Sign-in successful")
         # TODO make a call against the API to ensure the auth token
@@ -192,9 +192,9 @@ def _get_auth_token_client_credentials(
     client_secret: str,
     aad_tenant_id: str,
     api_scope: str,
+    verify: bool
 ):
-    allow_insecure = True  # TODO add option?
-    with Client(verify=not allow_insecure) as client:
+    with Client(verify=verify) as client:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         # Use Client Credentials flow
         payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope={api_scope}/.default"
