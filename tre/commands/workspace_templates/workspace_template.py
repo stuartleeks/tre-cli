@@ -22,7 +22,7 @@ def workspace_template(ctx: click.Context, template_name) -> None:
     ctx.obj = WorkspaceTemplateContext(template_name)
 
 
-@click.command(name="show", help="Workspace service")
+@click.command(name="show", help="Show template")
 @output_option()
 @query_option()
 @pass_workspace_template_context
@@ -45,6 +45,3 @@ def workspace_template_show(workspace_template_context: WorkspaceTemplateContext
 
 
 workspace_template.add_command(workspace_template_show)
-
-
-# TODO - operations endpoints
