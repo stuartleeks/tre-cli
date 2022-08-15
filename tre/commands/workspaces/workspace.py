@@ -24,7 +24,7 @@ def workspace_id_completion(ctx, param, incomplete):
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual workspace")
-@click.argument('workspace_id', envvar='TRECLI_WORKSPACE_ID', required=True, shell_complete=workspace_id_completion)
+@click.argument('workspace_id', envvar='TRECLI_WORKSPACE_ID', type=click.UUID, required=True, shell_complete=workspace_id_completion)
 @click.pass_context
 def workspace(ctx: click.Context, workspace_id: str) -> None:
     ctx.obj = WorkspaceContext(workspace_id)
