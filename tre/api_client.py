@@ -32,7 +32,6 @@ class ApiClient:
         self.verify = verify
 
     @staticmethod
-    @staticmethod
     def get_api_client_from_config() -> "ApiClient":
 
         config_path = Path("~/.config/tre/environment.json").expanduser()
