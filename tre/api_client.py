@@ -46,7 +46,7 @@ class ApiClient:
         login_method = config["login-method"]
         if login_method == "client-credentials":
             return ClientCredentialsApiClient(
-                config["base-url"],
+                os.getenv("TRECLI_BASE_URL") or config["base-url"],
                 config["verify"],
                 config["client-id"],
                 config["client-secret"],
@@ -55,7 +55,7 @@ class ApiClient:
             )
         elif login_method == "device-code":
             return DeviceCodeApiClient(
-                config["base-url"],
+                os.getenv("TRECLI_BASE_URL") or config["base-url"],
                 config["verify"],
                 config["token-cache-file"],
                 config["client-id"],
