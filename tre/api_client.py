@@ -78,7 +78,7 @@ class ApiClient:
         with Client(verify=self.verify) as client:
             headers = headers.copy()
             headers['Authorization'] = f"Bearer {self.get_auth_token(log, scope_id)}"
-            response = client.request(method, f'{self.base_url}/{url}', headers=headers, json=json_data)
+            response = client.request(method, f'{self.base_url}{url}', headers=headers, json=json_data)
             if throw_on_error and response.is_error:
                 error_info = {
                     'status_code': response.status_code,
@@ -95,7 +95,10 @@ class ApiClient:
         )
         workspace_json = workspace_response.json()
         workspace_scope = workspace_json["workspace"]["properties"]["scope_id"]
-        return workspace_scope + "/user_impersonation"
+        return workspace_scope
+
+    def get_auth_token() -> str:
+        pass
 
 
 class ClientCredentialsApiClient(ApiClient):
@@ -106,6 +109,8 @@ class ClientCredentialsApiClient(ApiClient):
                  client_secret: str,
                  aad_tenant_id: str,
                  scope: str):
+        while base_url.endswith("/"):
+            base_url = base_url[0:-1]
         super().__init__(base_url, verify)
         self._client_id = client_id
         self._client_secret = client_secret
@@ -188,3 +193,9 @@ class DeviceCodeApiClient(ApiClient):
                     cache_file.write(cache.serialize())
 
         raise RuntimeError(f"Failed to get auth token for scope '{scope}'")
+
+    def get_workspace_scope(self, log, workspace_id: str) -> str:
+        # device code flow wants "/user_impersonation" suffix, but client creds doesn't
+        # Override here to append
+        workspace_scope = super().get_workspace_scope(log, workspace_id)
+        return workspace_scope + "/user_impersonation"
