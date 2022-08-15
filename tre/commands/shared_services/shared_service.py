@@ -11,7 +11,7 @@ from .operations import shared_service_operations
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an individual shared_service")
-@click.argument('shared_service_id', envvar='TRECLI_WORKSPACE_ID', required=True)
+@click.argument('shared_service_id', required=True, type=click.UUID)
 @click.pass_context
 def shared_service(ctx: click.Context, shared_service_id: str) -> None:
     ctx.obj = SharedServiceContext(shared_service_id)

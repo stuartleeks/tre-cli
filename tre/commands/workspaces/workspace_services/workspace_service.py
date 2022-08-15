@@ -7,7 +7,7 @@ from .contexts import WorkspaceWorkspaceServiceContext, pass_workspace_workspace
 
 
 @click.group(name="workspace-service", invoke_without_command=True, help="Perform actions on an workspace-service")
-@click.argument('service_id', required=True)
+@click.argument('service_id', required=True, type=click.UUID)
 @click.pass_context
 def workspace_workspace_service(ctx: click.Context, service_id) -> None:
     ctx.obj = WorkspaceWorkspaceServiceContext.add_service_id_to_context_obj(ctx, service_id)

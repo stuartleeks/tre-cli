@@ -7,7 +7,7 @@ from .contexts import pass_workspace_operation_context, WorkspaceOperationContex
 
 
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")
-@click.argument('operation_id', required=True)
+@click.argument('operation_id', required=True, type=click.UUID)
 @click.pass_context
 def workspace_operation(ctx: click.Context, operation_id) -> None:
     ctx.obj = WorkspaceOperationContext.add_operation_id_to_context_obj(ctx, operation_id)

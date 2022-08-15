@@ -21,7 +21,7 @@ def airlock_id_completion(ctx: click.Context, param, incomplete):
 
 
 @click.group(invoke_without_command=True, help="Perform actions on an airlock request")
-@click.argument('airlock_id', required=True, shell_complete=airlock_id_completion)
+@click.argument('airlock_id', required=True, type=click.UUID, shell_complete=airlock_id_completion)
 @click.pass_context
 def airlock(ctx: click.Context, airlock_id: str) -> None:
     ctx.obj = WorkspaceAirlockContext.add_airlock_id_to_context_obj(ctx, airlock_id)
