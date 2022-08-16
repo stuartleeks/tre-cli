@@ -39,8 +39,6 @@ cli.add_command(get_token)
 
 # TODO - costs endpoints
 # TODO - workspace service endpoints
-# TODO - workspaces service templates
-# TODO - user resource templates
 # TODO - health
 # TODO - migrations?
 

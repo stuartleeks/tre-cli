@@ -5,6 +5,9 @@ from tre.output import output, output_option, query_option
 
 from .contexts import WorkspaceServiceTemplateContext, pass_workspace_service_template_context
 
+from .user_resource_templates.user_resource_templates import user_resource_templates
+from .user_resource_templates.user_resource_template import user_resource_template
+
 
 def template_name_completion(ctx, param, incomplete):
     log = logging.getLogger(__name__)
@@ -45,3 +48,5 @@ def workspace_service_template_show(workspace_service_template_context: Workspac
 
 
 workspace_service_template.add_command(workspace_service_template_show)
+workspace_service_template.add_command(user_resource_template)
+workspace_service_template.add_command(user_resource_templates)
