@@ -12,6 +12,8 @@ from tre.commands.workspace_templates.workspace_templates import workspace_templ
 from tre.commands.workspace_templates.workspace_template import workspace_template
 from tre.commands.shared_service_templates.shared_service_templates import shared_service_templates
 from tre.commands.shared_service_templates.shared_service_template import shared_service_template
+from tre.commands.workspace_service_templates.workspace_service_templates import workspace_service_templates
+from tre.commands.workspace_service_templates.workspace_service_template import workspace_service_template
 
 
 @click.group()
@@ -30,6 +32,8 @@ cli.add_command(workspace_templates)
 cli.add_command(workspace_template)
 cli.add_command(shared_service_templates)
 cli.add_command(shared_service_template)
+cli.add_command(workspace_service_templates)
+cli.add_command(workspace_service_template)
 
 cli.add_command(get_token)
 
