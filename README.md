@@ -158,7 +158,7 @@ WORKSPACE_ID=567f17d6-1abb-450f-991a-19398f89b3c2
 # Get the workspace etag
 ETAG=$(tre workspace $WORKSPACE_ID show --query workspace._etag -o json)
 # Disable the workspace (this is an asynchronous operation)
-tre workspace 12fb0878-d3b7-4c80-8456-23d4ba10b8cb set-enabled --etag $ETAG --enable --wait-for-completion
+OPERATION=$(tre workspace 12fb0878-d3b7-4c80-8456-23d4ba10b8cb set-enabled --etag $ETAG --enable --wait-for-completion)
 # ^ this last command will output progress information while waiting for the operation to complete.
 # And OPERATION contains the JSON describing the completed operation
 # allowing you to query the status property etc
