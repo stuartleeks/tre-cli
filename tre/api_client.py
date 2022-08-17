@@ -43,10 +43,16 @@ class ApiClient:
         config_text = config_path.read_text(encoding="utf-8")
         config = json.loads(config_text)
 
+        if os.getenv("TRECLI_BASE_URL"):
+            base_url = os.getenv("TRECLI_BASE_URL")
+            click.echo(f"Using API base URL '{base_url}' (overridden by TRECLI_BASE_URL)", err=True)
+        else:
+            base_url = config["base-url"]
+
         login_method = config["login-method"]
         if login_method == "client-credentials":
             return ClientCredentialsApiClient(
-                os.getenv("TRECLI_BASE_URL") or config["base-url"],
+                base_url,
                 config["verify"],
                 config["client-id"],
                 config["client-secret"],
@@ -55,7 +61,7 @@ class ApiClient:
             )
         elif login_method == "device-code":
             return DeviceCodeApiClient(
-                os.getenv("TRECLI_BASE_URL") or config["base-url"],
+                base_url,
                 config["verify"],
                 config["token-cache-file"],
                 config["client-id"],
