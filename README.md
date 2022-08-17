@@ -93,6 +93,7 @@ tre workspace 567f17d6-1abb-450f-991a-19398f89b3c2 operation 0f66839f-8727-43db-
 Initially, the command structure was more similar to the `az` CLI:
 
 ```bash
+## NOTE this is an alternate syntax for illustration (i.e. not how the CLI works)
 # list workspaces
 tre workspace list
 
@@ -106,6 +107,7 @@ However, as nested commands are added it requires editing multiple locations in 
 
 
 ```bash
+## NOTE this is an alternate syntax for illustration (i.e. not how the CLI works)
 # Find the workspace
 tre workspace list
 
