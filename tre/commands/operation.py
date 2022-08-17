@@ -5,6 +5,14 @@ from tre.api_client import ApiClient
 from tre.output import output
 
 
+def get_operation_id_completion(ctx, log, list_url, param, incomplete):
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(log, 'GET', list_url)
+    if response.is_success:
+        ids = [workspace["id"] for workspace in response.json()["operations"]]
+        return [id for id in ids if id.startswith(incomplete)]
+
+
 def is_operation_state_terminal(state: str) -> bool:
     # In the absence of a field on the operation indicating whether it is completed or not,
     # we maintain a list here.

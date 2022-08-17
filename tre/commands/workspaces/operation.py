@@ -1,13 +1,21 @@
 import logging
 import click
-from tre.commands.operation import operation_show
+from tre.commands.operation import get_operation_id_completion, operation_show
 from tre.output import output_option, query_option
 
 from .contexts import pass_workspace_operation_context, WorkspaceOperationContext
 
 
+def operation_id_completion(ctx, param, incomplete):
+    log = logging.getLogger(__name__)
+    parent_ctx = ctx.parent
+    workspace_id = parent_ctx.params["workspace_id"]
+    list_url = f'/api/workspaces/{workspace_id}/operations'
+    return get_operation_id_completion(ctx, log, list_url, param, incomplete)
+
+
 @click.group(name="operation", invoke_without_command=True, help="Perform actions on an operation")
-@click.argument('operation_id', required=True, type=click.UUID)
+@click.argument('operation_id', required=True, type=click.UUID, shell_complete=operation_id_completion)
 @click.pass_context
 def workspace_operation(ctx: click.Context, operation_id) -> None:
     ctx.obj = WorkspaceOperationContext.add_operation_id_to_context_obj(ctx, operation_id)
