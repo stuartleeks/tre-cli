@@ -24,7 +24,11 @@ The CLI allows you to log in using either a device code flow or client credentia
 To log in using device code flow, run:
 
 ```
-tre login device-code  --base-url https://mytre.westeurope.cloudapp.azure.com/ --client-id <API_CLIENT_ID> --aad-tenant-id <AAD_TENANT_ID> --api-scope <ROOT_API_SCOPE>
+tre login device-code \
+  --base-url https://mytre.westeurope.cloudapp.azure.com/ \
+  --client-id <API_CLIENT_ID> \
+  --aad-tenant-id <AAD_TENANT_ID> \
+  --api-scope <ROOT_API_SCOPE>
 ```
 
 This will prompt you to copy a device code and nagivate to https://microsoft.com/devicelogin to complete the login flow interactively.
@@ -45,7 +49,12 @@ You can pre-emptively get an authentication token for a workspace using the `--w
 To log in using client credentials flow (for a service principal), run:
 
 ```
-tre login client-credentials --base-url https://mytre.westeurope.cloudapp.azure.com/ --client-id <SERVICE_PRINICPAL_CLIENT_ID> --client-secret <SERVICE_PRINCIPAL_CLIENT_SECRET> --aad-tenant-id <AAD_TENANT_ID>  --api-scope <ROOT_API_SCOPE>
+tre login client-credentials \
+  --base-url https://mytre.westeurope.cloudapp.azure.com/ \
+  --client-id <SERVICE_PRINICPAL_CLIENT_ID> \
+  --client-secret <SERVICE_PRINCIPAL_CLIENT_SECRET> \
+  --aad-tenant-id <AAD_TENANT_ID> \
+  --api-scope <ROOT_API_SCOPE>
 ```
 
 You can specify `--no-verify` to disable SSL cert verification.
