@@ -64,7 +64,7 @@ NOTE: the api scope is usually of the form  `api://<API_CLIENT_ID>/user_imperson
 
 ### Login misc
 
-A number of the parameters on login could be removed by adding a `/.metadata` endpoint or similar to the API that returns the tenant id, api-scope and client id.
+A number of the parameters on login could be removed by adding a `/.metadata` endpoint or similar to the API that returns the tenant id, api-scope and client id. This would likely also be useful for the UI.
 
 ## General command structure
 
