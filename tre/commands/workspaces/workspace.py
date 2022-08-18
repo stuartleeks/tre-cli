@@ -1,3 +1,4 @@
+import json
 import click
 import logging
 
@@ -52,6 +53,47 @@ def workspace_show(workspace_context: WorkspaceContext, output_format, query):
     return response.text
 
 
+@click.command(name="update", help="Update a workspace")
+@click.option('--etag',
+              help='The etag of the workspace to update',
+              required=True)
+@click.option('--definition', help='JSON definition for the workspace', required=False)
+@click.option('--definition-file', help='File containing JSON definition for the workspace', required=False, type=click.File("r"))
+@click.option('--wait-for-completion',
+              flag_value=True,
+              default=False)
+@output_option()
+@query_option()
+@click.pass_context
+@pass_workspace_context
+def workspace_update(workspace_context: WorkspaceContext, ctx: click.Context, etag, definition, definition_file, wait_for_completion, output_format, query, suppress_output: bool = False):
+    log = logging.getLogger(__name__)
+
+    workspace_id = workspace_context.workspace_id
+    if workspace_id is None:
+        raise click.UsageError('Missing workspace ID')
+
+    if definition is None:
+        if definition_file is None:
+            raise click.UsageError('Please specify either a definition or a definition file')
+        definition = definition_file.read()
+
+    definition_dict = json.loads(definition)
+
+    client = ApiClient.get_api_client_from_config()
+    response = client.call_api(
+        log,
+        'PATCH',
+        f'/api/workspaces/{workspace_id}',
+        headers={'etag': etag},
+        json_data=definition_dict)
+    if wait_for_completion:
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
+    else:
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+
+
 @click.command(name="set-enabled", help="Enable/disable a workspace")
 @click.option('--etag',
               help='The etag of the workspace to update',
@@ -85,8 +127,6 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
     else:
         if not suppress_output:
             output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
-
-# TODO general PATCH command
 
 
 @click.command(name="delete", help="Delete a workspace")
@@ -138,6 +178,7 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
 
 
 workspace.add_command(workspace_show)
+workspace.add_command(workspace_update)
 workspace.add_command(workspace_set_enabled)
 workspace.add_command(workspace_delete)
 workspace.add_command(workspace_operations)
