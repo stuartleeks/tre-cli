@@ -30,7 +30,8 @@ def is_operation_state_terminal(state: str) -> bool:
         'not_deployed',
         'awaiting_deployment',
         'awaiting_deletion',
-        'awaiting_update'
+        'awaiting_update',
+        'updating'
     ]
 
 
