@@ -139,7 +139,7 @@ tre workspace 567f17d6-1abb-450f-991a-19398f89b3c2 operation 0f66839f-8727-43db-
 
 Many operations in TRE are asynchronous, and the corresponding API endpoints return a `202 Accepted` response with a `Location` header pointing to an operation endpoint.
 
-The commands corresponding to these asyncrhonous operations accept a `--wait-for-completion` option which will poll the operation and wait until it has completed.
+The commands corresponding to these asynchronous operations accept a `--wait-for-completion` option which will poll the operation and wait until it has completed.
 
 ## Command output
 
