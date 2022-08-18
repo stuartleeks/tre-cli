@@ -42,5 +42,7 @@ cli.add_command(get_token)
 # TODO - health
 # TODO - migrations?
 
+# TODO - when nested commands and using the response, force JSON for sub-command format
+
 if __name__ == "__main__":
     cli()

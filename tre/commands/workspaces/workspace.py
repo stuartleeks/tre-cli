@@ -86,6 +86,8 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
         if not suppress_output:
             output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
 
+# TODO general PATCH command
+
 
 @click.command(name="delete", help="Delete a workspace")
 @click.option('--yes', is_flag=True, default=False)
