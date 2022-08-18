@@ -1,3 +1,4 @@
+import sys
 from time import sleep
 
 import click
@@ -41,6 +42,7 @@ def is_operation_state_success(state: str) -> bool:
         'deployed',
         'action_succeeded',
         'pipeline_succeeded',
+        'updated'
     ]
 
 
@@ -76,6 +78,9 @@ def operation_show(log, operation_url, wait_for_completion, output_format, query
 
     if not suppress_output:
         output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+
+    if wait_for_completion and not is_operation_state_success(state):
+        sys.exit(1)
 
     return response.text
 
