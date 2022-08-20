@@ -3,21 +3,21 @@ import jmespath
 import json
 import typing as t
 from tabulate import tabulate
-
+from pygments import highlight, lexers, formatters
 from enum import Enum
 
 
 class OutputFormat(Enum):
-    # TODO - add pretty JSON? (format & colour)
     Suppress = 'none'
     Json = 'json'
+    JsonC = 'jsonc'
     Table = 'table'
 
 
 def output_option(*param_decls: str, **kwargs: t.Any):
     param_decls = ('--output', '-o', 'output_format')
-    kwargs.setdefault("default", 'json')
-    kwargs.setdefault("type", click.Choice(['table', 'json', 'none']))
+    kwargs.setdefault("default", 'table')
+    kwargs.setdefault("type", click.Choice(['table', 'json', 'jsonc', 'none']))
     kwargs.setdefault("envvar", "TRECLI_OUTPUT")
     kwargs.setdefault("help", "Output format")
     return click.option(*param_decls, **kwargs)
@@ -46,6 +46,10 @@ def output(result_json, output_format: OutputFormat = OutputFormat.Json, query: 
 
     if output_format == OutputFormat.Json.value:
         click.echo(output_json)
+    elif output_format == OutputFormat.JsonC.value:
+        formatted_json = json.dumps(json.loads(result_json), sort_keys=False, indent=2)
+        jsonc = highlight(formatted_json, lexers.JsonLexer(), formatters.TerminalFormatter())
+        click.echo(jsonc)
     elif output_format == OutputFormat.Table.value:
         content = json.loads(output_json)
         if content is not None:
