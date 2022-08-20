@@ -3,14 +3,14 @@ import click
 import logging
 
 from tre.api_client import ApiClient
-from tre.commands.operation import default_operation_table_query, operation_show
+from tre.commands.operation import default_operation_table_query_single, operation_show
 from tre.output import output, output_option, query_option
 from .contexts import pass_workspace_context, WorkspaceContext
 
 from .operation import workspace_operation
 from .operations import workspace_operations
-from .workspace_services.workspace_service import workspace_workspace_service
-from .workspace_services.workspace_services import workspace_workspace_services
+from .workspace_services.workspace_service import workspace_service
+from .workspace_services.workspace_services import workspace_services
 from .airlock.requests import airlocks
 from .airlock.request import airlock
 
@@ -91,7 +91,7 @@ def workspace_update(workspace_context: WorkspaceContext, ctx: click.Context, et
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
     else:
-        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
 
 @click.command(name="set-enabled", help="Enable/disable a workspace")
@@ -126,7 +126,7 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
     else:
         if not suppress_output:
-            output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+            output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
 
 @click.command(name="delete", help="Delete a workspace")
@@ -174,7 +174,7 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
 
 workspace.add_command(workspace_show)
@@ -186,8 +186,8 @@ workspace.add_command(workspace_operation)
 
 # TODO - user resource endpoints
 
-workspace.add_command(workspace_workspace_services)
-workspace.add_command(workspace_workspace_service)
+workspace.add_command(workspace_services)
+workspace.add_command(workspace_service)
 
 workspace.add_command(airlock)
 workspace.add_command(airlocks)

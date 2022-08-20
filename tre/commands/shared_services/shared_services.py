@@ -3,7 +3,7 @@ import json
 import logging
 
 from tre.api_client import ApiClient
-from tre.commands.operation import default_operation_table_query, operation_show
+from tre.commands.operation import default_operation_table_query_single, operation_show
 from tre.output import output, output_option, query_option
 
 
@@ -50,7 +50,7 @@ def shared_services_create(ctx, definition, definition_file, wait_for_completion
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
     else:
-        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
 
 shared_services.add_command(shared_services_list)

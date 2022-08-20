@@ -9,16 +9,15 @@ from tre.output import output, output_option, query_option
 
 
 @click.group(name="workspace-services", help="List workspace-services ")
-def workspace_workspace_services():
+def workspace_services():
     pass
 
 
-# TODO - table output
 @click.command(name="list", help="List workspace services")
 @output_option()
 @query_option()
 @pass_workspace_context
-def workspace_workspace_services_list(workspace_context, output_format, query):
+def workspace_services_list(workspace_context, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -47,7 +46,7 @@ def workspace_workspace_services_list(workspace_context, output_format, query):
 @output_option()
 @query_option()
 @pass_workspace_context
-def workspace_workspace_services_create(workspace_context: WorkspaceContext, definition, definition_file, wait_for_completion, output_format, query):
+def workspace_services_create(workspace_context: WorkspaceContext, definition, definition_file, wait_for_completion, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -74,11 +73,11 @@ def workspace_workspace_services_create(workspace_context: WorkspaceContext, def
 
     if wait_for_completion:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
     else:
         output(response.text, output_format=output_format, query=query)
         return response.text
 
 
-workspace_workspace_services.add_command(workspace_workspace_services_list)
-workspace_workspace_services.add_command(workspace_workspace_services_create)
+workspace_services.add_command(workspace_services_list)
+workspace_services.add_command(workspace_services_create)

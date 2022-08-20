@@ -6,9 +6,9 @@ from tre.api_client import ApiClient
 from tre.output import output
 
 
-def get_operation_id_completion(ctx, log, list_url, param, incomplete):
+def get_operation_id_completion(ctx, log, list_url, param, incomplete, scope_id: str = None):
     client = ApiClient.get_api_client_from_config()
-    response = client.call_api(log, 'GET', list_url)
+    response = client.call_api(log, 'GET', list_url, scope_id=scope_id)
     if response.is_success:
         ids = [workspace["id"] for workspace in response.json()["operations"]]
         return [id for id in ids if id.startswith(incomplete)]
@@ -46,17 +46,22 @@ def is_operation_state_success(state: str) -> bool:
     ]
 
 
-def default_operation_table_query():
+def default_operation_table_query_list():
     return r"operations[].{id:id, status:status, action:action, resourcePath:resourcePath, message:message}"
 
 
-def operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output: bool = False):
+def default_operation_table_query_single():
+    return r"operation.{id:id, status:status, action:action, resourcePath:resourcePath, message:message}"
+
+
+def operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output: bool = False, scope_id: str = None):
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(
         log,
         'GET',
-        operation_url
+        operation_url,
+        scope_id=scope_id
     )
     response_json = response.json()
     action = response_json['operation']['action']
@@ -70,14 +75,15 @@ def operation_show(log, operation_url, wait_for_completion, output_format, query
         response = client.call_api(
             log,
             'GET',
-            operation_url
+            operation_url,
+            scope_id=scope_id
         )
         response_json = response.json()
         action = response_json['operation']['action']
         state = response_json['operation']['status']
 
     if not suppress_output:
-        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
     if wait_for_completion and not is_operation_state_success(state):
         sys.exit(1)
@@ -85,12 +91,13 @@ def operation_show(log, operation_url, wait_for_completion, output_format, query
     return response.text
 
 
-def operations_list(log, operations_url, output_format, query):
+def operations_list(log, operations_url, output_format, query, scope_id: str = None):
     client = ApiClient.get_api_client_from_config()
 
     response = client.call_api(
         log,
         'GET',
         operations_url,
+        scope_id=scope_id
     )
-    output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query())
+    output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_list())
