@@ -1,5 +1,7 @@
 import click
 
+from tre.commands.workspaces.contexts import WorkspaceContext
+
 
 class WorkspaceWorkspaceServiceContext(object):
     def __init__(self, workspace_id: str, service_id: str):
