@@ -28,6 +28,7 @@ def is_operation_state_terminal(state: str) -> bool:
         'awaiting_action',
         'invoking_action',
         'pipeline_deploying',
+        'pipeline_running',
         'not_deployed',
         'awaiting_deployment',
         'awaiting_deletion',
