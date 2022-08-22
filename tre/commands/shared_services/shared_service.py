@@ -1,4 +1,3 @@
-from curses import noraw
 import click
 import logging
 
