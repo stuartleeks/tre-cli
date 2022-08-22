@@ -67,3 +67,7 @@ user_resource.add_command(user_resource_operations)
 
 
 # TODO PATCH
+
+# TODO - DELETE
+
+# TODO - invoke action

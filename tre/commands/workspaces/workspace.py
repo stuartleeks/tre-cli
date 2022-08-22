@@ -178,6 +178,8 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
         operation_url = response.headers['location']
         operation_show(log, operation_url, no_wait, output_format=output_format, query=query)
 
+# TODO - invoke action
+
 
 workspace.add_command(workspace_show)
 workspace.add_command(workspace_update)
