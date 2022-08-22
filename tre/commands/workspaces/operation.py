@@ -22,14 +22,14 @@ def workspace_operation(ctx: click.Context, operation_id) -> None:
 
 
 @click.command(name="show", help="Workspace operation")
-@click.option('--wait-for-completion',
-              help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
+@click.option('--no-wait',
+              help="If an operation is in progress, do not wait for it to complete",
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_workspace_operation_context
-def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
+def workspace_operation_show(workspace_operation_context: WorkspaceOperationContext, no_wait, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_operation_context.workspace_id
@@ -40,7 +40,7 @@ def workspace_operation_show(workspace_operation_context: WorkspaceOperationCont
         raise click.UsageError('Missing operation ID')
 
     operation_url = f'/api/workspaces/{workspace_id}/operations/{operation_id}'
-    operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output)
+    operation_show(log, operation_url, no_wait, output_format, query, suppress_output)
 
 
 workspace_operation.add_command(workspace_operation_show)

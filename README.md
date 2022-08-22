@@ -139,7 +139,7 @@ tre workspace 567f17d6-1abb-450f-991a-19398f89b3c2 operation 0f66839f-8727-43db-
 
 Many operations in TRE are asynchronous, and the corresponding API endpoints return a `202 Accepted` response with a `Location` header pointing to an operation endpoint.
 
-The commands corresponding to these asynchronous operations accept a `--wait-for-completion` option which will poll the operation and wait until it has completed.
+The commands corresponding to these asynchronous operations will poll this resulting operation and wait until it has completed. If you don't want this behaviour, you can pass the `--no-wait` option.
 
 ## Command output
 
@@ -157,7 +157,7 @@ This can be combined with `--output table`, e.g. `tre workspaces list -o table -
 
 ### Capturing results
 
-Some of the commands in the CLI output progress information (e.g. `tre workspace new ... --wait-for-completion`).
+Some of the commands in the CLI output progress information (e.g. `tre workspace new ...`).
 
 When the CLI outputs progress information, it outputs it to stderr. The final result of the command is output to stdout.
 
@@ -169,7 +169,7 @@ WORKSPACE_ID=567f17d6-1abb-450f-991a-19398f89b3c2
 # Get the workspace etag
 ETAG=$(tre workspace $WORKSPACE_ID show --query workspace._etag --output json)
 # Disable the workspace (this is an asynchronous operation)
-OPERATION=$(tre workspace $WORKSPACE_ID set-enabled --etag $ETAG --enable --output json --wait-for-completion)
+OPERATION=$(tre workspace $WORKSPACE_ID set-enabled --etag $ETAG --enable --output json)
 # ^ this last command will output progress information while waiting for the operation to complete.
 # And OPERATION contains the JSON describing the completed operation
 # allowing you to query the status property etc

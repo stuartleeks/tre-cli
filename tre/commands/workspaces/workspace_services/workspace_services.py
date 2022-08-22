@@ -40,13 +40,13 @@ def workspace_services_list(workspace_context, output_format, query):
 @click.command(name="new", help="Create a new workspace-service")
 @click.option('--definition', help='JSON definition for the workspace service', required=False)
 @click.option('--definition-file', help='File containing JSON definition for the workspace service', required=False, type=click.File("r"))
-@click.option('--wait-for-completion',
+@click.option('--no-wait',
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_workspace_context
-def workspace_services_create(workspace_context: WorkspaceContext, definition, definition_file, wait_for_completion, output_format, query):
+def workspace_services_create(workspace_context: WorkspaceContext, definition, definition_file, no_wait, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -71,12 +71,12 @@ def workspace_services_create(workspace_context: WorkspaceContext, definition, d
         scope_id=workspace_scope
     )
 
-    if wait_for_completion:
-        operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
-    else:
+    if no_wait:
         output(response.text, output_format=output_format, query=query)
         return response.text
+    else:
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
 
 
 workspace_services.add_command(workspace_services_list)

@@ -29,14 +29,14 @@ def workspace_service_operation(ctx: click.Context, operation_id) -> None:
 
 
 @click.command(name="show", help="Workspace-service operation")
-@click.option('--wait-for-completion',
-              help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
+@click.option('--no-wait',
+              help="If an operation is in progress, do not wait for it to complete",
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_workspace_service_operation_context
-def workspace_service_operation_show(workspace_service_operation_context: WorkspaceServiceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
+def workspace_service_operation_show(workspace_service_operation_context: WorkspaceServiceOperationContext, no_wait, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_service_operation_context.workspace_id
@@ -53,7 +53,7 @@ def workspace_service_operation_show(workspace_service_operation_context: Worksp
     workspace_scope = client.get_workspace_scope(log, workspace_id)
 
     operation_url = f'/api/workspaces/{workspace_id}/workspace-services/{workspace_service_id}/operations/{operation_id}'
-    operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output, scope_id=workspace_scope)
+    operation_show(log, operation_url, no_wait, output_format, query, suppress_output, scope_id=workspace_scope)
 
 
 workspace_service_operation.add_command(workspace_service_operation_show)

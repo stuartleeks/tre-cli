@@ -29,14 +29,14 @@ def user_resource_operation(ctx: click.Context, operation_id) -> None:
 
 
 @click.command(name="show", help="Show user resource operation")
-@click.option('--wait-for-completion',
-              help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
+@click.option('--no-wait',
+              help="If an operation is in progress, do not wait for it to complete",
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_user_resource_operation_context
-def user_resource_operation_show(user_resource_operation_context: UserResourceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False) -> None:
+def user_resource_operation_show(user_resource_operation_context: UserResourceOperationContext, no_wait, output_format, query, suppress_output: bool = False) -> None:
     log = logging.getLogger(__name__)
 
     workspace_id = user_resource_operation_context.workspace_id
@@ -56,7 +56,7 @@ def user_resource_operation_show(user_resource_operation_context: UserResourceOp
     workspace_scope = client.get_workspace_scope(log, workspace_id)
 
     operation_url = f'/api/workspaces/{workspace_id}/workspace-services/{workspace_service_id}/user-resources/{user_resource_id}/operations/{operation_id}'
-    operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output, scope_id=workspace_scope)
+    operation_show(log, operation_url, no_wait, output_format, query, suppress_output, scope_id=workspace_scope)
 
 
 user_resource_operation.add_command(user_resource_operation_show)

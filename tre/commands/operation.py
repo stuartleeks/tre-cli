@@ -19,7 +19,7 @@ def is_operation_state_terminal(state: str) -> bool:
     # we maintain a list here.
     # Note that we test against 'active' states
     # This way, a new state will be considered terminal (and not a success)
-    # so we avoid a case where --wait-for-completion continues indefinitely
+    # so we avoid a case where waiting for copmletion continues indefinitely
     # when there is a new state (and we return a non-successful status to
     # highlight it)
     return state not in [
@@ -55,7 +55,9 @@ def default_operation_table_query_single():
     return r"operation.{id:id, status:status, action:action, resourcePath:resourcePath, message:message}"
 
 
-def operation_show(log, operation_url, wait_for_completion, output_format, query, suppress_output: bool = False, scope_id: str = None):
+def operation_show(log, operation_url, no_wait, output_format, query, suppress_output: bool = False, scope_id: str = None):
+
+    wait_for_completion = not no_wait
 
     client = ApiClient.get_api_client_from_config()
     response = client.call_api(

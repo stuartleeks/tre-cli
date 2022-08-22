@@ -44,13 +44,13 @@ def user_resources_list(workspace_service_context: WorkspaceServiceContext, outp
 @click.command(name="new", help="Create a new user resource")
 @click.option('--definition', help='JSON definition for the user resource', required=False)
 @click.option('--definition-file', help='File containing JSON definition for the user resource', required=False, type=click.File("r"))
-@click.option('--wait-for-completion',
+@click.option('--no-wait',
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_workspace_service_context
-def user_resouce_create(workspace_service_context: WorkspaceServiceContext, definition, definition_file, wait_for_completion, output_format, query):
+def user_resouce_create(workspace_service_context: WorkspaceServiceContext, definition, definition_file, no_wait, output_format, query):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_service_context.workspace_id
@@ -78,12 +78,12 @@ def user_resouce_create(workspace_service_context: WorkspaceServiceContext, defi
         scope_id=workspace_scope
     )
 
-    if wait_for_completion:
-        operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
-    else:
+    if no_wait:
         output(response.text, output_format=output_format, query=query)
         return response.text
+    else:
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
 
 
 user_resources.add_command(user_resources_list)

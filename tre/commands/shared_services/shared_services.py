@@ -26,13 +26,13 @@ def shared_services_list(output_format, query):
 @click.command(name="new", help="Create a new shared_service")
 @click.option('--definition', help='JSON definition for the shared_service', required=False)
 @click.option('--definition-file', help='File containing JSON definition for the shared_service', required=False, type=click.File("r"))
-@click.option('--wait-for-completion',
+@click.option('--no-wait',
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @click.pass_context
-def shared_services_create(ctx, definition, definition_file, wait_for_completion, output_format, query):
+def shared_services_create(ctx, definition, definition_file, no_wait, output_format, query):
     log = logging.getLogger(__name__)
 
     if definition is None:
@@ -46,11 +46,11 @@ def shared_services_create(ctx, definition, definition_file, wait_for_completion
     click.echo("Creating shared_service...", err=True)
     response = client.call_api(log, 'POST', '/api/shared-services', json_data=definition_dict)
 
-    if wait_for_completion:
+    if no_wait:
+        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
+    else:
         operation_url = response.headers['location']
         operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
-    else:
-        output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
 
 
 shared_services.add_command(shared_services_list)

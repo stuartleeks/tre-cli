@@ -31,13 +31,13 @@ def workspaces_list(output_format, query):
 @click.command(name="new", help="Create a new workspace")
 @click.option('--definition', help='JSON definition for the workspace', required=False)
 @click.option('--definition-file', help='File containing JSON definition for the workspace', required=False, type=click.File("r"))
-@click.option('--wait-for-completion',
+@click.option('--no-wait',
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @click.pass_context
-def workspaces_create(ctx, definition, definition_file, wait_for_completion, output_format, query):
+def workspaces_create(ctx, definition, definition_file, no_wait, output_format, query):
     log = logging.getLogger(__name__)
 
     if definition is None:
@@ -51,12 +51,12 @@ def workspaces_create(ctx, definition, definition_file, wait_for_completion, out
     click.echo("Creating workspace...", err=True)
     response = client.call_api(log, 'POST', '/api/workspaces', json_data=definition_dict)
 
-    if wait_for_completion:
-        operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
-    else:
+    if no_wait:
         output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
         return response.text
+    else:
+        operation_url = response.headers['location']
+        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
 
 
 workspaces.add_command(workspaces_list)

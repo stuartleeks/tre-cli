@@ -23,14 +23,14 @@ def shared_service_operation(ctx: click.Context, operation_id) -> None:
 
 
 @click.command(name="show", help="SharedService operation")
-@click.option('--wait-for-completion',
-              help="If an operation is in progress, wait for it to complete (when operation_id is specified)",
+@click.option('--no-wait',
+              help="If an operation is in progress, do not wait for it to complete",
               flag_value=True,
               default=False)
 @output_option()
 @query_option()
 @pass_shared_service_operation_context
-def shared_service_operation_show(shared_service_operation_context: SharedServiceOperationContext, wait_for_completion, output_format, query, suppress_output: bool = False):
+def shared_service_operation_show(shared_service_operation_context: SharedServiceOperationContext, no_wait, output_format, query, suppress_output: bool = False):
     log = logging.getLogger(__name__)
 
     shared_service_id = shared_service_operation_context.shared_service_id
@@ -42,7 +42,7 @@ def shared_service_operation_show(shared_service_operation_context: SharedServic
 
     operation_url = f'/api/shared-services/{shared_service_id}/operations/{operation_id}'
 
-    operation_show(log, operation_url, wait_for_completion, suppress_output, output_format=output_format, query=query)
+    operation_show(log, operation_url, no_wait, suppress_output, output_format=output_format, query=query)
 
 
 shared_service_operation.add_command(shared_service_operation_show)

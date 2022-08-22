@@ -38,11 +38,8 @@ cli.add_command(workspace_service_template)
 cli.add_command(get_token)
 
 # TODO - costs endpoints
-# TODO - workspace service endpoints
 # TODO - health
 # TODO - migrations?
-
-# TODO - when nested commands and using the response, force JSON for sub-command format
 
 if __name__ == "__main__":
     cli()
