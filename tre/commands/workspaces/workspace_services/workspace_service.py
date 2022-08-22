@@ -6,6 +6,8 @@ from tre.output import output, output_option, query_option
 from .contexts import WorkspaceServiceContext, pass_workspace_service_context
 from .operation import workspace_service_operation
 from .operations import workspace_service_operations
+from .user_resources.user_resource import user_resource
+from .user_resources.user_resources import user_resources
 
 
 def workspace_service_id_completion(ctx: click.Context, param, incomplete):
@@ -57,8 +59,8 @@ def workspace_service_show(workspace_workspace_service_context: WorkspaceService
 workspace_service.add_command(workspace_service_show)
 workspace_service.add_command(workspace_service_operation)
 workspace_service.add_command(workspace_service_operations)
+workspace_service.add_command(user_resource)
+workspace_service.add_command(user_resources)
 
 
 # TODO PATCH
-
-# TODO - operations endpoints

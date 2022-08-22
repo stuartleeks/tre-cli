@@ -8,7 +8,7 @@ from tre.commands.workspaces.contexts import WorkspaceContext, pass_workspace_co
 from tre.output import output, output_option, query_option
 
 
-@click.group(name="workspace-services", help="List workspace-services ")
+@click.group(name="workspace-services", help="List/add workspace-services ")
 def workspace_services():
     pass
 
@@ -38,8 +38,8 @@ def workspace_services_list(workspace_context, output_format, query):
 
 
 @click.command(name="new", help="Create a new workspace-service")
-@click.option('--definition', help='JSON definition for the workspace', required=False)
-@click.option('--definition-file', help='File containing JSON definition for the workspace', required=False, type=click.File("r"))
+@click.option('--definition', help='JSON definition for the workspace service', required=False)
+@click.option('--definition-file', help='File containing JSON definition for the workspace service', required=False, type=click.File("r"))
 @click.option('--wait-for-completion',
               flag_value=True,
               default=False)

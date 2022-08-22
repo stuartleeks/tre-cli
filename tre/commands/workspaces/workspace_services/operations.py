@@ -12,7 +12,7 @@ def workspace_service_operations():
     pass
 
 
-@click.command(name="list", help="List workspace operations")
+@click.command(name="list", help="List workspace service operations")
 @output_option()
 @query_option()
 @pass_workspace_service_context
