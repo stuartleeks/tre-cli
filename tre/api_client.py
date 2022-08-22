@@ -184,19 +184,21 @@ class DeviceCodeApiClient(ApiClient):
             if auth_result is not None:
                 return auth_result["access_token"]
 
-        if sys.stdin.isatty():
+        if sys.stdin.isatty() or sys.stdout.isatty():
             # We have TTY - try interactive acquire :-)
-            click.echo(f"No cached token - initiating device code flow for scope '{effective_scope}'")
+            click.echo(f"No cached token - initiating device code flow for scope '{effective_scope}'", err=True)
             flow = app.initiate_device_flow(scopes=[effective_scope])
             if "user_code" not in flow:
                 raise click.ClickException("unable to initiate device flow")
 
             click.echo(flow['message'], err=True)
-            app.acquire_token_by_device_flow(flow)
+            auth_result = app.acquire_token_by_device_flow(flow)
 
             if cache.has_state_changed:
                 with open(self._token_cache_file, "w") as cache_file:
                     cache_file.write(cache.serialize())
+            if auth_result is not None:
+                return auth_result["access_token"]
 
         raise RuntimeError(f"Failed to get auth token for scope '{scope}'")
 
