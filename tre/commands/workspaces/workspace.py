@@ -184,8 +184,6 @@ workspace.add_command(workspace_delete)
 workspace.add_command(workspace_operations)
 workspace.add_command(workspace_operation)
 
-# TODO - user resource endpoints
-
 workspace.add_command(workspace_services)
 workspace.add_command(workspace_service)
 
