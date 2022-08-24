@@ -1,4 +1,5 @@
 import click
+from .commands.costs.costs import costs
 
 from tre.commands.get_token import get_token
 from tre.commands.login import login
@@ -37,7 +38,9 @@ cli.add_command(workspace_service_template)
 
 cli.add_command(get_token)
 
-# TODO - costs endpoints
+
+cli.add_command(costs)
+
 # TODO - health
 # TODO - migrations?
 
