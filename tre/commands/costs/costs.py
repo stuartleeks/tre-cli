@@ -13,11 +13,11 @@ def costs() -> None:
 
 @click.command(name="overall", help="Show overall costs")
 @click.option("--from", "from_date",
-              type=str,  # TODO add validation on date format
-              help="The start date to pull data from, required if --to is set, otherwise report will return month to date (iso-8601, UTC).")
+              type=click.DateTime(['%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y%m%d']),
+              help="The start date to pull data from, required if --to is set, otherwise report will return month to date (UTC).")
 @click.option("--to", "to_date",
-              type=str,  # TODO add validation on date format
-              help="The end date to pull data to, required if --to is set, otherwise report will return month to date (iso-8601, UTC).")
+              type=click.DateTime(['%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y%m%d']),
+              help="The end date to pull data to, required if --to is set, otherwise report will return month to date ( UTC).")
 @click.option("--granularity",
               type=click.Choice(["None", "Daily"]),
               required=False,
@@ -52,11 +52,11 @@ def costs_overall(from_date, to_date, granularity, output_format, query):
 @click.command(name="workspace", help="Show costs for a workspace")
 @click.argument('workspace_id', envvar='TRECLI_WORKSPACE_ID', type=click.UUID, required=True, shell_complete=workspace_id_completion)
 @click.option("--from", "from_date",
-              type=str,  # TODO add validation on date format
-              help="The start date to pull data from, required if --to is set, otherwise report will return month to date (iso-8601, UTC).")
+              type=click.DateTime(['%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y%m%d']),
+              help="The start date to pull data from, required if --to is set, otherwise report will return month to date (UTC).")
 @click.option("--to", "to_date",
-              type=str,  # TODO add validation on date format
-              help="The end date to pull data to, required if --to is set, otherwise report will return month to date (iso-8601, UTC).")
+              type=click.DateTime(['%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y%m%d']),
+              help="The end date to pull data to, required if --to is set, otherwise report will return month to date (UTC).")
 @click.option("--granularity",
               type=click.Choice(["None", "Daily"]),
               required=False,
