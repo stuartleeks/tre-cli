@@ -2,7 +2,7 @@ import click
 import logging
 
 from tre.api_client import ApiClient
-from ..workspaces.workspace import workspace_id_completion
+from tre.commands.workspaces.workspace import workspace_id_completion
 from tre.output import output, output_option, query_option
 
 

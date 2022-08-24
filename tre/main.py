@@ -1,5 +1,6 @@
 import click
-from .commands.costs.costs import costs
+from .commands.costs import costs
+from .commands.health import health
 
 from tre.commands.get_token import get_token
 from tre.commands.login import login
@@ -38,10 +39,10 @@ cli.add_command(workspace_service_template)
 
 cli.add_command(get_token)
 
-
 cli.add_command(costs)
 
-# TODO - health
+cli.add_command(health)
+
 # TODO - migrations?
 
 if __name__ == "__main__":
