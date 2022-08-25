@@ -4,7 +4,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 PROJECT = 'tre'
-VERSION = '0.1'
+VERSION = '0.1.1'
 
 try:
     long_description = open('README.md', 'rt').read()  # TODO: add long description
@@ -15,7 +15,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='Demo TRE CLI for AzureTRE',
+    description='Experimental TRE CLI for AzureTRE',
     long_description=long_description,
 
     author='Stuart Leeks',
@@ -39,7 +39,14 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['click'],
+    install_requires=[
+        "click==8.1.3",
+        "httpx~=0.23.0",
+        "msal >= 1.17.0",
+        "jmespath==1.0.1",
+        "tabulate==0.8.10",
+        "pygments==2.13.0"
+    ],
 
     namespace_packages=[],
     packages=find_packages(),
