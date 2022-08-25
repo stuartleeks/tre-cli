@@ -1,9 +1,7 @@
-name: pr-build
+name: package
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
     branches: ["main"]
 
 jobs:
@@ -26,6 +24,11 @@ jobs:
         uses: devcontainers/ci@v0.2
         with:
           imageName: ghcr.io/stuartleeks/tre-cli/tre-cli-devcontainer
-          runCmd: make install-cli && source <(_TRE_COMPLETE=bash_source tre) && tre --help
-          push: filter
-          refFilterForPush: refs/heads/main
+          runCmd: make build-package
+          push: never
+
+      - name: Upload Wheel as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tre-cli
+          path: dist/tre-*.whl
