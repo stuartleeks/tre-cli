@@ -47,7 +47,7 @@ def output(result_json, output_format: OutputFormat = OutputFormat.Json, query: 
     if output_format == OutputFormat.Json.value:
         click.echo(output_json)
     elif output_format == OutputFormat.JsonC.value:
-        formatted_json = json.dumps(json.loads(result_json), sort_keys=False, indent=2)
+        formatted_json = json.dumps(json.loads(output_json), sort_keys=False, indent=2)
         jsonc = highlight(formatted_json, lexers.JsonLexer(), formatters.TerminalFormatter())
         click.echo(jsonc)
     elif output_format == OutputFormat.Table.value:
