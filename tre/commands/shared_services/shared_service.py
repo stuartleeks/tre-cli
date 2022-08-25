@@ -66,7 +66,7 @@ def shared_service_invoke_action(shared_service_context: SharedServiceContext, c
         output(response.text, output_format=output_format, query=query)
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query)
 
 
 @click.command(name="delete", help="Delete a shared_service")
@@ -95,7 +95,7 @@ def shared_service_delete(shared_service_context: SharedServiceContext, ctx: cli
         output(response.text, output_format=output_format, query=query)
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query)
 
 
 shared_service.add_command(shared_service_show)

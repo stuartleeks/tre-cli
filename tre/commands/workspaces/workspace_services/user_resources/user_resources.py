@@ -83,7 +83,7 @@ def user_resouce_create(workspace_service_context: WorkspaceServiceContext, defi
         return response.text
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, scope_id=workspace_scope)
 
 
 user_resources.add_command(user_resources_list)

@@ -92,7 +92,7 @@ def workspace_update(workspace_context: WorkspaceContext, ctx: click.Context, et
         output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, suppress_output=suppress_output)
 
 
 @click.command(name="set-enabled", help="Enable/disable a workspace")
@@ -105,9 +105,8 @@ def workspace_update(workspace_context: WorkspaceContext, ctx: click.Context, et
               default=False)
 @output_option()
 @query_option()
-@click.pass_context
 @pass_workspace_context
-def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Context, etag, enable, no_wait, output_format, query, suppress_output: bool = False):
+def workspace_set_enabled(workspace_context: WorkspaceContext, etag, enable, no_wait, output_format, query, suppress_output: bool = False):
     log = logging.getLogger(__name__)
 
     workspace_id = workspace_context.workspace_id
@@ -128,7 +127,7 @@ def workspace_set_enabled(workspace_context: WorkspaceContext, ctx: click.Contex
             output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, suppress_output=suppress_output)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, suppress_output=suppress_output)
 
 
 @click.command(name="delete", help="Delete a workspace")
@@ -165,7 +164,7 @@ def workspace_delete(workspace_context: WorkspaceContext, ctx: click.Context, ye
                 workspace_set_enabled,
                 etag=etag,
                 enable=False,
-                wait_for_completion=True,
+                no_wait=False,
                 suppress_output=True
             )
 

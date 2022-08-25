@@ -76,7 +76,7 @@ def workspace_services_create(workspace_context: WorkspaceContext, definition, d
         return response.text
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query, scope_id=workspace_scope)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, scope_id=workspace_scope)
 
 
 workspace_services.add_command(workspace_services_list)

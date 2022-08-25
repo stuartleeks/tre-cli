@@ -50,7 +50,7 @@ def shared_services_create(ctx, definition, definition_file, no_wait, output_for
         output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, wait_for_completion=True, output_format=output_format, query=query)
+        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query)
 
 
 shared_services.add_command(shared_services_list)
