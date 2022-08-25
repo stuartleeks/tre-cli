@@ -101,7 +101,14 @@ def workspace_service_update(workspace_service_context: WorkspaceServiceContext,
         output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, suppress_output=suppress_output)
+        operation_show(
+            log,
+            operation_url,
+            no_wait=False,
+            output_format=output_format,
+            query=query,
+            suppress_output=suppress_output,
+            scope_id=workspace_scope)
 
 
 @click.command(name="set-enabled", help="Enable/disable a workspace service")
@@ -141,7 +148,14 @@ def workspace_service_set_enabled(workspace_service_context: WorkspaceServiceCon
             output(response.text, output_format=output_format, query=query, default_table_query=default_operation_table_query_single())
     else:
         operation_url = response.headers['location']
-        operation_show(log, operation_url, no_wait=False, output_format=output_format, query=query, suppress_output=suppress_output)
+        operation_show(
+            log,
+            operation_url,
+            no_wait=False,
+            output_format=output_format,
+            query=query,
+            suppress_output=suppress_output,
+            scope_id=workspace_scope)
 
 
 workspace_service.add_command(workspace_service_show)
